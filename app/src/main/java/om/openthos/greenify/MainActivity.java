@@ -65,5 +65,6 @@ public class MainActivity extends BaseActivity {
             mManager.beginTransaction().hide(mCurrentFragment).show(fragment).commit();
         }
         mCurrentFragment = fragment;
+        mCurrentFragment.refresh();
     }
 }
