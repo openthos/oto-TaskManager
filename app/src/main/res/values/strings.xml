@@ -4,4 +4,10 @@
     <string name="running">正在运行</string>
     <string name="sleep_list">休眠列表</string>
     <string name="all_app">所有应用</string>
+    <string name="application_name">应用名</string>
+    <string name="state">状态</string>
+    <string name="add_sleep_list">加入休眠列表</string>
+    <string name="is_in_sleep_list">是否在休眠列表</string>
+    <string name="stop_run">停止运行</string>
+    <string name="remove_sleep_list">移除休眠列表</string>
 </resources>

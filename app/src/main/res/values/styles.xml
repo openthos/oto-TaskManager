@@ -16,4 +16,17 @@
         <item name="android:textColor">@color/text_color</item>
         <item name="android:background">@drawable/main_rb_background_selector</item>
     </style>
+
+    <style name="ItemLayoutStyle">
+        <item name="android:layout_marginBottom">@dimen/padding_one</item>
+        <item name="android:background">@drawable/item_layout_bg_selector</item>
+    </style>
+
+    <style name="ItemTextStyle">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">@dimen/padding_five</item>
+        <item name="android:textSize">@dimen/common_text_size</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:singleLine">true</item>
+    </style>
 </resources>

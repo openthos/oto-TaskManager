@@ -31,6 +31,7 @@ public class MainActivity extends BaseActivity {
         mSleepFragment = new AppSleepFragment();
         mWholeFragment = new AppWholeFragment();
 
+        initAppInfos();
         mManager.beginTransaction()
                 .add(R.id.container, mSleepFragment).hide(mSleepFragment)
                 .add(R.id.container, mWholeFragment).hide(mWholeFragment)

@@ -105,7 +105,7 @@ public abstract class BaseActivity extends FragmentActivity {
      *
      * @return
      */
-    public Map<String, AppInfo> getNotSystemApps() {
+    public Map<String, AppInfo> getAppInfosMap() {
         initRunningAPP();
         return mNotSystemApps;
     }

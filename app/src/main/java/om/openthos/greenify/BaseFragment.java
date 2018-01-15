@@ -6,6 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Map;
+
+import om.openthos.greenify.bean.AppInfo;
+
 /**
  * Created by ljh on 18-1-11.
  */
@@ -27,6 +31,10 @@ public abstract class BaseFragment extends Fragment {
         initView(view);
         initData();
         initListener();
+    }
+
+    public Map<String, AppInfo> getAppInfosMap() {
+        return ((MainActivity) getActivity()).getAppInfosMap();
     }
 
     public abstract int getLayoutId();

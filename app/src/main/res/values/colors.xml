@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="line">#eeeeee</color>
+    <color name="line">@color/lightgray</color>
     <color name="theme">#fe970f</color>
     <color name="main_bg">#f0eff5</color>
     <color name="hint_color">#999999</color>
