@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">OtoGreenify</string>
+    <string name="app_name">任务管理器</string>
+
+    <string name="running">正在运行</string>
+    <string name="sleep_list">休眠列表</string>
+    <string name="all_app">所有应用</string>
 </resources>
