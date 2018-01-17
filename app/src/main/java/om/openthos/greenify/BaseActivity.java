@@ -21,6 +21,7 @@ import om.openthos.greenify.utils.SleepAppUtils;
 
 
 public abstract class BaseActivity extends FragmentActivity {
+    public static int DELAY_TIME_REFRESH = 500;
 
     private static Map<String, AppInfo> mNotSystemApps;
 
@@ -122,6 +123,7 @@ public abstract class BaseActivity extends FragmentActivity {
             for (ActivityManager.RunningServiceInfo info : runningServices) {
                 if (packageName.equals(info.service.getPackageName())) {
                     appInfo.setRun(true);
+                    appInfo.setPid(info.pid);
                 }
             }
         }
@@ -132,7 +134,7 @@ public abstract class BaseActivity extends FragmentActivity {
      *
      * @param pkgName
      */
-    private void forceStopAPK(String pkgName) {
+    public void forceStopAPK(String pkgName) {
         Process sh = null;
         DataOutputStream os = null;
         try {
@@ -144,6 +146,9 @@ public abstract class BaseActivity extends FragmentActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void refresh() {
     }
 
     public abstract int getLayoutId();

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="running_right">
+        <item>@string/add_sleep_list</item>
+        <item>@string/immediately_sleep</item>
+        <item>@string/sleep_add_list</item>
+    </string-array>
+</resources>

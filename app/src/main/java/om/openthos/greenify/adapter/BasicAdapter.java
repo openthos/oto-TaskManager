@@ -11,4 +11,5 @@ public abstract class BasicAdapter extends BaseAdapter {
     }
 
     public abstract void refreshList();
+
 }

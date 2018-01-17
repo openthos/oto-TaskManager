@@ -5,20 +5,17 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
-import om.openthos.greenify.MainActivity;
 import om.openthos.greenify.R;
-import om.openthos.greenify.bean.AppInfo;
 
-public class WholeAppAdapter extends BasicAdapter {
-    private List<AppInfo> mDatas;
+public class MenuAdapter extends BasicAdapter {
+    private List<String> mDatas;
 
-    public WholeAppAdapter(Context context, List<AppInfo> datas) {
+    public MenuAdapter(Context context, List<String> datas) {
         super(context);
         mDatas = datas;
     }
@@ -43,19 +40,14 @@ public class WholeAppAdapter extends BasicAdapter {
         ViewHolder holder;
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext)
-                    .inflate(R.layout.item_whole_app, parent, false);
+                    .inflate(R.layout.item_menu, parent, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        AppInfo appInfo = mDatas.get(position);
-        holder.appIcon.setImageDrawable(appInfo.getIcon());
-        holder.appName.setText(appInfo.getAppName());
-        holder.state.setText(appInfo.isRun() ? R.string.running : R.string.stop_run);
-        holder.inListText.setVisibility(View.GONE);
-        holder.inListIcon.setImageResource(appInfo.isAdd() ? R.mipmap.decrease : R.mipmap.add);
-        holder.inListIcon.setTag(position);
+        holder.menuText.setText(mDatas.get(position));
+        holder.menuText.setTag(position);
         return convertView;
     }
 
@@ -64,31 +56,14 @@ public class WholeAppAdapter extends BasicAdapter {
         notifyDataSetChanged();
     }
 
-    private class ViewHolder implements View.OnClickListener, View.OnHoverListener {
+    private class ViewHolder implements View.OnHoverListener {
         private LinearLayout layout;
-        private TextView appName;
-        private TextView state;
-        private TextView inListText;
-        private ImageView inListIcon;
-        private ImageView appIcon;
+        private TextView menuText;
 
         public ViewHolder(View view) {
-            appIcon = (ImageView) view.findViewById(R.id.app_icon);
-            appName = (TextView) view.findViewById(R.id.app_name);
             layout = (LinearLayout) view.findViewById(R.id.layout);
-            state = (TextView) view.findViewById(R.id.state);
-            inListText = (TextView) view.findViewById(R.id.in_sleep_text);
-            inListIcon = (ImageView) view.findViewById(R.id.in_sleep_icon);
+            menuText = (TextView) view.findViewById(R.id.menu_text);
             layout.setOnHoverListener(this);
-            inListIcon.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            int position = (int) v.getTag();
-            AppInfo appInfo = mDatas.get(position);
-            ((MainActivity) mContext).addSleepList(appInfo.getPackageName(), !appInfo.isAdd());
-            refreshList();
         }
 
         @Override

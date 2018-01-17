@@ -1,6 +1,8 @@
 package om.openthos.greenify;
 
 import android.app.FragmentManager;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.view.View;
 
 import om.openthos.greenify.fragment.AppRunningFragment;
@@ -8,7 +10,7 @@ import om.openthos.greenify.fragment.AppSleepFragment;
 import om.openthos.greenify.fragment.AppWholeFragment;
 
 public class MainActivity extends BaseActivity {
-
+    private Handler mHandler;
     private FragmentManager mManager;
     private BaseFragment mRunningFragment;
     private BaseFragment mSleepFragment;
@@ -26,6 +28,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void initData() {
+        mHandler = new Handler();
         mManager = getFragmentManager();
         mRunningFragment = new AppRunningFragment();
         mSleepFragment = new AppSleepFragment();
@@ -65,7 +68,20 @@ public class MainActivity extends BaseActivity {
         } else if (mCurrentFragment != fragment) {
             mManager.beginTransaction().hide(mCurrentFragment).show(fragment).commit();
         }
+        mManager.executePendingTransactions();
         mCurrentFragment = fragment;
         mCurrentFragment.refresh();
+    }
+
+    @Override
+    public void refresh() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mCurrentFragment != null) {
+                    mCurrentFragment.refresh();
+                }
+            }
+        }, DELAY_TIME_REFRESH);
     }
 }

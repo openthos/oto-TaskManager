@@ -3,12 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/main_bg"
     android:orientation="vertical"
     tools:context="om.openthos.greenify.fragment.AppRunningFragment">
 
-    <TextView
+    <ListView
+        android:id="@+id/listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/running"/>
+        android:divider="@color/line"
+        android:dividerHeight="@dimen/padding_one"/>
 
 </LinearLayout>

@@ -2,6 +2,7 @@ package om.openthos.greenify.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -62,7 +63,7 @@ public class SleepAppAdapter extends BasicAdapter {
         notifyDataSetChanged();
     }
 
-    private class ViewHolder implements View.OnClickListener {
+    private class ViewHolder implements View.OnClickListener, View.OnHoverListener {
         private TextView appName;
         private TextView state;
         private TextView removeListText;
@@ -76,6 +77,7 @@ public class SleepAppAdapter extends BasicAdapter {
             removeListIcon = (ImageView) view.findViewById(R.id.remove_sleep_icon);
             appIcon = (ImageView) view.findViewById(R.id.app_icon);
             removeListIcon.setOnClickListener(this);
+            view.setOnHoverListener(this);
         }
 
         @Override
@@ -85,6 +87,19 @@ public class SleepAppAdapter extends BasicAdapter {
             ((MainActivity) mContext).addSleepList(appInfo.getPackageName(), false);
             mDatas.remove(position);
             refreshList();
+        }
+
+        @Override
+        public boolean onHover(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    v.setSelected(true);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    v.setSelected(false);
+                    break;
+            }
+            return false;
         }
     }
 }
