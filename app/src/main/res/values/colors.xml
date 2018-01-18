@@ -5,10 +5,10 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="line">@color/lightgray</color>
-    <color name="theme">#fe970f</color>
+    <color name="theme">#87CEFA</color>
     <color name="main_bg">#f0eff5</color>
     <color name="hint_color">#999999</color>
-    <color name="text_color">#666666</color>
+    <color name="text_color">#333333</color>
 
     <!--common color -->
     <color name="transparent">#00000000</color>

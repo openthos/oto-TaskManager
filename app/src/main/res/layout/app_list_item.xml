@@ -9,6 +9,7 @@
         style="@style/ItemLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/item_height"
+        android:background="@color/white"
         android:orientation="horizontal">
 
         <ImageView
@@ -88,5 +89,25 @@
             android:layout_weight="1"
             android:text="@string/pid"
             />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/dormant"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/padding_ten"
+                android:src="@mipmap/dormant"
+                />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

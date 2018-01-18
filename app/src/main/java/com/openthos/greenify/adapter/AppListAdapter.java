@@ -1,6 +1,7 @@
 package com.openthos.greenify.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,16 +10,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.List;
-
-import com.openthos.greenify.MainActivity;
 import com.openthos.greenify.R;
 import com.openthos.greenify.bean.AppInfo;
+import com.openthos.greenify.listener.OnListClickListener;
 
-public class WholeAppAdapter extends BasicAdapter {
+import java.util.List;
+
+public class AppListAdapter extends BasicAdapter {
     private List<AppInfo> mDatas;
+    private OnListClickListener mOnListClickListener;
 
-    public WholeAppAdapter(Context context, List<AppInfo> datas) {
+    public AppListAdapter(Context context, List<AppInfo> datas) {
         super(context);
         mDatas = datas;
     }
@@ -42,21 +44,25 @@ public class WholeAppAdapter extends BasicAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext)
-                    .inflate(R.layout.item_whole_app, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.app_list_item, parent, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
         AppInfo appInfo = mDatas.get(position);
-        holder.appIcon.setImageDrawable(appInfo.getIcon());
-        holder.appName.setText(appInfo.getAppName());
-        holder.state.setText(appInfo.isRun() ? R.string.running : R.string.stop_run);
-        holder.inListText.setVisibility(View.GONE);
-        holder.inListIcon.setImageResource(appInfo.isAdd() ? R.mipmap.decrease : R.mipmap.add);
-        holder.inListIcon.setTag(position);
+        holder.icon.setImageDrawable(appInfo.getIcon());
+        holder.name.setText(appInfo.getAppName());
+        holder.cpu.setText(appInfo.getCpuUsage());
+        holder.memory.setText(appInfo.getMemoryUsage());
+        holder.battery.setText(appInfo.getBatteryUsage());
+        holder.pid.setText(appInfo.getPid());
+        holder.layout.setTag(appInfo.getPackageName());
         return convertView;
+    }
+
+    public void setOnListClickListener(OnListClickListener onListClickListener) {
+        mOnListClickListener = onListClickListener;
     }
 
     @Override
@@ -66,39 +72,40 @@ public class WholeAppAdapter extends BasicAdapter {
 
     private class ViewHolder implements View.OnClickListener, View.OnHoverListener {
         private LinearLayout layout;
-        private TextView appName;
-        private TextView state;
-        private TextView inListText;
-        private ImageView inListIcon;
-        private ImageView appIcon;
+        private ImageView icon;
+        private TextView name;
+        private TextView cpu;
+        private TextView memory;
+        private TextView battery;
+        private TextView pid;
 
         public ViewHolder(View view) {
-            appIcon = (ImageView) view.findViewById(R.id.app_icon);
-            appName = (TextView) view.findViewById(R.id.app_name);
             layout = (LinearLayout) view.findViewById(R.id.layout);
-            state = (TextView) view.findViewById(R.id.state);
-            inListText = (TextView) view.findViewById(R.id.in_sleep_text);
-            inListIcon = (ImageView) view.findViewById(R.id.in_sleep_icon);
+            icon = (ImageView) view.findViewById(R.id.app_icon);
+            name = (TextView) view.findViewById(R.id.app_name);
+            cpu = (TextView) view.findViewById(R.id.cpu_usage);
+            memory = (TextView) view.findViewById(R.id.memory_usage);
+            battery = (TextView) view.findViewById(R.id.battery_usage);
+            pid = (TextView) view.findViewById(R.id.pid);
+            layout.setOnClickListener(this);
             layout.setOnHoverListener(this);
-            inListIcon.setOnClickListener(this);
         }
 
         @Override
-        public void onClick(View v) {
-            int position = (int) v.getTag();
-            AppInfo appInfo = mDatas.get(position);
-            ((MainActivity) mContext).addSleepList(appInfo.getPackageName(), !appInfo.isAdd());
-            refreshList();
+        public void onClick(View view) {
+            if (mOnListClickListener != null) {
+                mOnListClickListener.onListClickListener(view, (String) view.getTag());
+            }
         }
 
         @Override
         public boolean onHover(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_HOVER_ENTER:
-                    v.setSelected(true);
+                    v.setBackgroundColor(mContext.getResources().getColor(R.color.hint_color));
                     break;
                 case MotionEvent.ACTION_HOVER_EXIT:
-                    v.setSelected(false);
+                    v.setBackgroundColor(mContext.getResources().getColor(R.color.white));
                     break;
             }
             return false;

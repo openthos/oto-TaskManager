@@ -1,18 +1,22 @@
 <resources>
     <string name="app_name">任务管理器</string>
     <string name="running">正在运行</string>
-    <string name="sleep_list">休眠列表</string>
+    <string name="dormant_list">休眠列表</string>
+    <string name="dormant">休眠</string>
     <string name="all_app">所有应用</string>
     <string name="application_name">应用名</string>
     <string name="state">状态</string>
-    <string name="add_sleep_list">加入休眠列表</string>
-    <string name="immediately_sleep">立即休眠</string>
-    <string name="sleep_add_list">休眠并加入休眠列表</string>
-    <string name="is_in_sleep_list">是否在休眠列表</string>
+    <string name="add_dormant_list">加入休眠列表</string>
+    <string name="immediately_dormant">立即休眠</string>
+    <string name="dormant_add_list">休眠并加入休眠列表</string>
+    <string name="is_in_dormant_list">是否在休眠列表</string>
     <string name="stop_run">停止运行</string>
-    <string name="remove_sleep_list">移除休眠列表</string>
+    <string name="remove_dormant_list">移除休眠列表</string>
     <string name="pid">pid</string>
     <string name="battery_usage">电池使用情况</string>
     <string name="memory_usage">内存使用情况</string>
     <string name="cpu_usage">cpu使用情况</string>
+    <string name="have_dormant">已休眠</string>
+    <string name="wait_dormant">待休眠</string>
+    <string name="non_dormant">无需休眠</string>
 </resources>

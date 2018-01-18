@@ -9,7 +9,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -20,25 +19,23 @@ import java.util.List;
 import com.openthos.greenify.MainActivity;
 import com.openthos.greenify.R;
 import com.openthos.greenify.adapter.MenuAdapter;
-import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.bean.DialogType;
 
-public class MenuDialog extends Dialog implements AdapterView.OnItemClickListener {
-    private static MenuDialog mMenuDialog;
+public class BaseDialog extends Dialog{
+    private static BaseDialog mBaseDialog;
     private MainActivity mActivity;
-    private AppInfo mAppInfo;
     private ListView mMenuList;
     private MenuAdapter mAdapter;
     private List<String> mDatas;
 
-    public static MenuDialog getInstance(Context context) {
-        if (mMenuDialog == null) {
-            mMenuDialog = new MenuDialog(context);
+    public static BaseDialog getInstance(Context context) {
+        if (mBaseDialog == null) {
+            mBaseDialog = new BaseDialog(context);
         }
-        return mMenuDialog;
+        return mBaseDialog;
     }
 
-    public MenuDialog(@NonNull Context context) {
+    public BaseDialog(@NonNull Context context) {
         super(context, R.style.MenuDialogStyle);
         mActivity = (MainActivity) context;
         create();
@@ -64,11 +61,9 @@ public class MenuDialog extends Dialog implements AdapterView.OnItemClickListene
     }
 
     private void initListener() {
-        mMenuList.setOnItemClickListener(this);
     }
 
-    public void show(DialogType type, AppInfo appInfo, int x, int y) {
-        mAppInfo = appInfo;
+    public void show(DialogType type, int x, int y) {
         refreshList(type);
 
         Window dialogWindow = getWindow();
@@ -108,19 +103,5 @@ public class MenuDialog extends Dialog implements AdapterView.OnItemClickListene
     @Override
     public void dismiss() {
         super.dismiss();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String content = mDatas.get(position);
-        if (content.equals(getContext().getResources().getString(R.string.add_sleep_list))) {
-            mActivity.addSleepList(mAppInfo.getPackageName(), true);
-        } else if (content.equals(getContext().getResources().getString(R.string.immediately_sleep))) {
-            mActivity.forceStopAPK(mAppInfo.getPackageName());
-        } else if (content.equals(getContext().getResources().getString(R.string.sleep_add_list))) {
-            mActivity.addSleepList(mAppInfo.getPackageName(), true);
-            mActivity.forceStopAPK(mAppInfo.getPackageName());
-        }
-        mActivity.refresh();
     }
 }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
+import com.openthos.greenify.app.Constants;
+
 public class AppInfo {
     private String appName;
     private String packageName;
@@ -12,9 +14,9 @@ public class AppInfo {
     private float cpuUsage;
     private long memoryUsage;
     private String batteryUsage;
-
     private boolean isRun;
-    private boolean isAdd;
+    private boolean isDormant;
+    private boolean isNonDormant;
 
     public AppInfo() {
     }
@@ -43,24 +45,33 @@ public class AppInfo {
         this.icon = icon;
     }
 
-    public int getPid() {
-        return pid;
+    public String getPid() {
+        if (pid == 0){
+            return "";
+        }
+        return String.valueOf(pid);
     }
 
     public void setPid(int pid) {
         this.pid = pid;
     }
 
-    public float getCpuUsage() {
-        return cpuUsage;
+    public String getCpuUsage() {
+        if (cpuUsage == 0){
+            return "";
+        }
+        return cpuUsage + "%";
     }
 
     public void setCpuUsage(float cpuUsage) {
         this.cpuUsage = cpuUsage;
     }
 
-    public long getMemoryUsage() {
-        return memoryUsage;
+    public String getMemoryUsage() {
+        if (memoryUsage == 0){
+            return "";
+        }
+        return String.valueOf(memoryUsage);
     }
 
     public void setMemoryUsage(long memoryUsage) {
@@ -68,6 +79,9 @@ public class AppInfo {
     }
 
     public String getBatteryUsage() {
+        if (batteryUsage == null){
+            return "";
+        }
         return batteryUsage;
     }
 
@@ -83,12 +97,30 @@ public class AppInfo {
         isRun = run;
     }
 
-    public boolean isAdd() {
-        return isAdd;
+    public boolean isDormant() {
+        return isDormant;
     }
 
-    public void setAdd(boolean add) {
-        isAdd = add;
+    public void setDormant(boolean dormant) {
+        isDormant = dormant;
+    }
+
+    public boolean isNonDormant() {
+        return isNonDormant;
+    }
+
+    public void setNonDormant(boolean nonDormant) {
+        isNonDormant = nonDormant;
+    }
+
+    public int getDormantState() {
+        if (isDormant()) {
+            return isRun() ? Constants.APP_WAIT_DORMANT : Constants.APP_HAVE_DORMANT;
+        }
+        if (isNonDormant()) {
+            return Constants.APP_NON_DORMANT;
+        }
+        return Constants.App_NON_DEAL;
     }
 
     public Intent getIntent(Context context) {

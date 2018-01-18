@@ -9,6 +9,7 @@
         style="@style/ItemLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/item_height"
+        android:background="@color/white"
         android:orientation="horizontal">
 
         <ImageView
@@ -39,12 +40,12 @@
             android:background="@color/line"/>
 
         <TextView
-            android:id="@+id/state"
+            android:id="@+id/cpu_usage"
             style="@style/ItemTextStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/state"
+            android:text="@string/cpu_usage"
             />
 
         <View
@@ -52,26 +53,56 @@
             android:layout_height="match_parent"
             android:background="@color/line"/>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/memory_usage"
+            style="@style/ItemTextStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:text="@string/memory_usage"
+            />
 
-            <TextView
-                android:id="@+id/remove_sleep_text"
-                style="@style/ItemTextStyle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/remove_sleep_list"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
 
-            <ImageView
-                android:id="@+id/remove_sleep_icon"
-                android:layout_width="@dimen/image_size"
-                android:layout_height="@dimen/image_size"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/padding_ten"
-                />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/battery_usage"
+            style="@style/ItemTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/battery_usage"
+            />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <TextView
+            android:id="@+id/pid"
+            style="@style/ItemTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/pid"
+            />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <TextView
+            android:id="@+id/dormant"
+            style="@style/ItemTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/dormant"
+            />
     </LinearLayout>
+
 </LinearLayout>

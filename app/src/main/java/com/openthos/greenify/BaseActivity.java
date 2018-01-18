@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.openthos.greenify.bean.AppInfo;
-import com.openthos.greenify.utils.SleepAppUtils;
+import com.openthos.greenify.utils.DormantAppUtils;
+import com.openthos.greenify.utils.NonDormantAppUtils;
 
 
 public abstract class BaseActivity extends FragmentActivity {
@@ -43,7 +43,8 @@ public abstract class BaseActivity extends FragmentActivity {
         }
         PackageManager manager = getPackageManager();
         List<PackageInfo> packageInfos = manager.getInstalledPackages(0);
-        Map<String, String> allAddedApp = SleepAppUtils.getInstance(this).getAllAddedApp();
+        Map<String, String> dormantMaps = DormantAppUtils.getInstance(this).getAllAddedApp();
+        Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(this).getAllAddedApp();
         AppInfo appInfo = null;
         for (PackageInfo packageInfo : packageInfos) {
             if (isSystemApps(packageInfo)) {
@@ -53,10 +54,15 @@ public abstract class BaseActivity extends FragmentActivity {
             appInfo.setAppName(packageInfo.applicationInfo.loadLabel(manager).toString());
             appInfo.setPackageName(packageInfo.packageName);
             appInfo.setIcon(packageInfo.applicationInfo.loadIcon(manager));
-            if (allAddedApp != null && allAddedApp.containsKey(appInfo.getPackageName())) {
-                appInfo.setAdd(true);
+            if (dormantMaps != null && dormantMaps.containsKey(appInfo.getPackageName())) {
+                appInfo.setDormant(true);
             } else {
-                appInfo.setAdd(false);
+                appInfo.setDormant(false);
+            }
+            if (nonDormantMaps != null && nonDormantMaps.containsKey(appInfo.getPackageName())) {
+                appInfo.setNonDormant(true);
+            } else {
+                appInfo.setNonDormant(false);
             }
             mNotSystemApps.put(appInfo.getPackageName(), appInfo);
         }
@@ -88,15 +94,34 @@ public abstract class BaseActivity extends FragmentActivity {
      * @param packageName
      * @param isAdd
      */
-    public void addSleepList(String packageName, boolean isAdd) {
+    public void addDormantList(String packageName, boolean isAdd) {
         AppInfo appInfo = mNotSystemApps.get(packageName);
         if (appInfo != null) {
             if (isAdd) {
-                SleepAppUtils.getInstance(this).saveAddedApp(packageName, appInfo.getAppName());
-                appInfo.setAdd(true);
+                DormantAppUtils.getInstance(this).saveAddedApp(packageName, appInfo.getAppName());
+                appInfo.setDormant(true);
             } else {
-                SleepAppUtils.getInstance(this).removeAddApp(packageName);
-                appInfo.setAdd(false);
+                DormantAppUtils.getInstance(this).removeAddApp(packageName);
+                appInfo.setDormant(false);
+            }
+        }
+    }
+
+    /**
+     * Store the package name as packageName or remove the saved SP
+     *
+     * @param packageName
+     * @param isAdd
+     */
+    public void addNonDormantList(String packageName, boolean isAdd) {
+        AppInfo appInfo = mNotSystemApps.get(packageName);
+        if (appInfo != null) {
+            if (isAdd) {
+                NonDormantAppUtils.getInstance(this).saveAddedApp(packageName, appInfo.getAppName());
+                appInfo.setNonDormant(true);
+            } else {
+                NonDormantAppUtils.getInstance(this).removeAddApp(packageName);
+                appInfo.setNonDormant(false);
             }
         }
     }

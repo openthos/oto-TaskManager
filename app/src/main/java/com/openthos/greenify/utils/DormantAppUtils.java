@@ -3,22 +3,23 @@ package com.openthos.greenify.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.openthos.greenify.app.Constants;
+
 import java.util.Map;
 
-public class SleepAppUtils {
-    private static final String SP_ADDED_APP = "added_app";
-    private static SleepAppUtils instance;
+public class DormantAppUtils {
+    private static DormantAppUtils instance;
     private SharedPreferences mPreferences;
 
-    public static SleepAppUtils getInstance(Context context) {
+    public static DormantAppUtils getInstance(Context context) {
         if (instance == null) {
-            instance = new SleepAppUtils(context);
+            instance = new DormantAppUtils(context);
         }
         return instance;
     }
 
-    private SleepAppUtils(Context context) {
-        mPreferences = context.getSharedPreferences(SP_ADDED_APP, Context.MODE_PRIVATE);
+    private DormantAppUtils(Context context) {
+        mPreferences = context.getSharedPreferences(Constants.SP_DORMANT_APP, Context.MODE_PRIVATE);
     }
 
     /**
