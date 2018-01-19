@@ -8,23 +8,34 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/title_height"
-        android:background="@color/theme">
+        android:background="@color/theme"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/refresh"
+            android:layout_width="@dimen/image_size"
+            android:layout_height="@dimen/image_size"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/padding_ten"
+            android:src="@mipmap/refresh"/>
 
         <TextView
             style="@style/TitleTextStyle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/app_name"/>
-    </LinearLayout>
+    </RelativeLayout>
 
     <ListView
         android:id="@+id/listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@color/main_bg"
-        android:dividerHeight="@dimen/padding_one"/>
+        android:dividerHeight="@dimen/padding_one"
+        android:footerDividersEnabled="true"/>
 </LinearLayout>

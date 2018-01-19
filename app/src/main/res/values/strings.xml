@@ -19,4 +19,5 @@
     <string name="have_dormant">已休眠</string>
     <string name="wait_dormant">待休眠</string>
     <string name="non_dormant">无需休眠</string>
+    <string name="add_or_remove">添加/移除</string>
 </resources>

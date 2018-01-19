@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.openthos.greenify.adapter.AppLayoutAdapter;
@@ -19,9 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends BaseActivity implements OnListClickListener {
+public class MainActivity extends BaseActivity implements OnListClickListener, View.OnClickListener {
     private Handler mHandler;
-    private ListView mListView;
     private List<AppLayoutInfo> mDatas;
     private AppLayoutAdapter mAdapter;
 
@@ -37,8 +37,11 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
     //Currently selected application package name
     private String mSelectPkgName;
 
-    private View mLastView;
     private ScreenStatusReceiver mScreenStatusReceiver;
+
+    private ImageView mRefresh;
+    private ListView mListView;
+    private View mLastView;
 
     @Override
     public int getLayoutId() {
@@ -47,6 +50,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
 
     @Override
     public void initView() {
+        mRefresh = (ImageView) findViewById(R.id.refresh);
         mListView = (ListView) findViewById(R.id.listview);
     }
 
@@ -69,6 +73,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
 
     @Override
     public void initListener() {
+        mRefresh.setOnClickListener(this);
         mAdapter.setOnListClickListener(this);
     }
 
@@ -95,9 +100,9 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
                     mWaitDormants.add(appInfo);
                     break;
                 case Constants.App_NON_DEAL:
-                    mNonNeedDormants.add(appInfo);
-                    mWaitDormants.add(appInfo);
-                    mHaveDormants.add(appInfo);
+                    if (appInfo.isRun()) {
+                        mWaitDormants.add(appInfo);
+                    }
                     break;
             }
         }
@@ -118,7 +123,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                refresh();
+                loadData();
             }
         }, DELAY_TIME_REFRESH);
     }
@@ -145,7 +150,59 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
 
     @Override
     public void onListClickListener(View view, String packageName) {
+        switch (view.getId()) {
+            case R.id.dormant:
+                forceStopAPK(packageName);
+                refresh();
+                break;
+            case R.id.img1:
+                switch (getAppInfoByPkgName(packageName).getDormantState()) {
+                    case Constants.APP_WAIT_DORMANT:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, false);
+                        break;
+                    case Constants.APP_HAVE_DORMANT:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, false);
+                        break;
+                    case Constants.APP_NON_DORMANT:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, false);
+                        break;
+                    case Constants.App_NON_DEAL:
+                        addDormantList(packageName, true);
+                        addNonDormantList(packageName, false);
+                        break;
+                }
+                loadData();
+                break;
+            case R.id.img2:
+                switch (getAppInfoByPkgName(packageName).getDormantState()) {
+                    case Constants.APP_WAIT_DORMANT:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, true);
+                        break;
+                    case Constants.APP_HAVE_DORMANT:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, true);
+                        break;
+                    case Constants.APP_NON_DORMANT:
+                        addDormantList(packageName, true);
+                        addNonDormantList(packageName, false);
+                        break;
+                    case Constants.App_NON_DEAL:
+                        addDormantList(packageName, false);
+                        addNonDormantList(packageName, true);
+                        break;
+                }
+                loadData();
+                break;
+        }
+    }
 
+    @Override
+    public void onClick(View v) {
+        loadData();
     }
 
     /**
@@ -158,7 +215,13 @@ public class MainActivity extends BaseActivity implements OnListClickListener {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-
+                    Map<String, AppInfo> appInfosMap = getAppInfosMap();
+                    for (String packageName : appInfosMap.keySet()) {
+                        AppInfo appInfo = getAppInfoByPkgName(packageName);
+                        if (appInfo.getDormantState() == Constants.APP_WAIT_DORMANT) {
+                            forceStopAPK(packageName);
+                        }
+                    }
                     break;
                 case Intent.ACTION_SCREEN_ON:
                     refresh();

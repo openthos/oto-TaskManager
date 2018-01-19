@@ -82,12 +82,12 @@
             android:background="@color/line"/>
 
         <TextView
-            android:id="@+id/pid"
+            android:id="@+id/add_or_remove"
             style="@style/ItemTextStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/pid"
+            android:text="@string/add_or_remove"
             />
 
         <View

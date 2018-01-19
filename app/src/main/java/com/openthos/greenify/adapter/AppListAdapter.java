@@ -1,7 +1,7 @@
 package com.openthos.greenify.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.openthos.greenify.R;
+import com.openthos.greenify.app.Constants;
 import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.listener.OnListClickListener;
 
@@ -56,9 +57,38 @@ public class AppListAdapter extends BasicAdapter {
         holder.cpu.setText(appInfo.getCpuUsage());
         holder.memory.setText(appInfo.getMemoryUsage());
         holder.battery.setText(appInfo.getBatteryUsage());
-        holder.pid.setText(appInfo.getPid());
+
+        switch (appInfo.getDormantState()) {
+            case Constants.APP_WAIT_DORMANT:
+                holder.dormant.setVisibility(View.VISIBLE);
+                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
+                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
+                break;
+            case Constants.APP_HAVE_DORMANT:
+                holder.dormant.setVisibility(View.GONE);
+                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
+                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
+                break;
+            case Constants.APP_NON_DORMANT:
+                holder.dormant.setVisibility(View.GONE);
+                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
+                holder.img2.setBackground(getDrawable(R.mipmap.o_dormant));
+                break;
+            case Constants.App_NON_DEAL:
+                holder.dormant.setVisibility(View.VISIBLE);
+                holder.img1.setBackground(getDrawable(R.mipmap.o_dormant));
+                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
+                break;
+        }
+        holder.img1.setTag(appInfo.getPackageName());
+        holder.img2.setTag(appInfo.getPackageName());
+        holder.dormant.setTag(appInfo.getPackageName());
         holder.layout.setTag(appInfo.getPackageName());
         return convertView;
+    }
+
+    public Drawable getDrawable(int resId) {
+        return mContext.getResources().getDrawable(resId);
     }
 
     public void setOnListClickListener(OnListClickListener onListClickListener) {
@@ -77,7 +107,10 @@ public class AppListAdapter extends BasicAdapter {
         private TextView cpu;
         private TextView memory;
         private TextView battery;
-        private TextView pid;
+        private ImageView img1;
+        private ImageView img2;
+        private ImageView dormant;
+        ;
 
         public ViewHolder(View view) {
             layout = (LinearLayout) view.findViewById(R.id.layout);
@@ -86,8 +119,13 @@ public class AppListAdapter extends BasicAdapter {
             cpu = (TextView) view.findViewById(R.id.cpu_usage);
             memory = (TextView) view.findViewById(R.id.memory_usage);
             battery = (TextView) view.findViewById(R.id.battery_usage);
-            pid = (TextView) view.findViewById(R.id.pid);
+            img1 = (ImageView) view.findViewById(R.id.img1);
+            img2 = (ImageView) view.findViewById(R.id.img2);
+            dormant = (ImageView) view.findViewById(R.id.dormant);
             layout.setOnClickListener(this);
+            img1.setOnClickListener(this);
+            img2.setOnClickListener(this);
+            dormant.setOnClickListener(this);
             layout.setOnHoverListener(this);
         }
 
