@@ -68,7 +68,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         mHaveDormants = new ArrayList<>();
         mNonNeedDormants = new ArrayList<>();
         mWaitDormants = new ArrayList<>();
-        loadData();
+        refresh();
     }
 
     @Override
@@ -120,10 +120,11 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
     @Override
     public void refresh() {
+        loadData();
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                loadData();
+                refresh();
             }
         }, DELAY_TIME_REFRESH);
     }
@@ -153,7 +154,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         switch (view.getId()) {
             case R.id.dormant:
                 forceStopAPK(packageName);
-                refresh();
+                loadData();
                 break;
             case R.id.img1:
                 switch (getAppInfoByPkgName(packageName).getDormantState()) {
@@ -224,7 +225,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                     }
                     break;
                 case Intent.ACTION_SCREEN_ON:
-                    refresh();
+                    loadData();
                     break;
             }
         }
