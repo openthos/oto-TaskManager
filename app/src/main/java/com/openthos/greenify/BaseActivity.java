@@ -19,7 +19,6 @@ import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.utils.DormantAppUtils;
 import com.openthos.greenify.utils.NonDormantAppUtils;
 
-
 public abstract class BaseActivity extends FragmentActivity {
     public static int DELAY_TIME_REFRESH = 500;
 
@@ -45,7 +44,7 @@ public abstract class BaseActivity extends FragmentActivity {
         List<PackageInfo> packageInfos = manager.getInstalledPackages(0);
         Map<String, String> dormantMaps = DormantAppUtils.getInstance(this).getAllAddedApp();
         Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(this).getAllAddedApp();
-        AppInfo appInfo = null;
+        AppInfo appInfo;
         for (PackageInfo packageInfo : packageInfos) {
             if (isSystemApps(packageInfo)) {
                 continue;
@@ -53,6 +52,7 @@ public abstract class BaseActivity extends FragmentActivity {
             appInfo = new AppInfo();
             appInfo.setAppName(packageInfo.applicationInfo.loadLabel(manager).toString());
             appInfo.setPackageName(packageInfo.packageName);
+
             appInfo.setIcon(packageInfo.applicationInfo.loadIcon(manager));
             if (dormantMaps != null && dormantMaps.containsKey(appInfo.getPackageName())) {
                 appInfo.setDormant(true);
@@ -141,14 +141,19 @@ public abstract class BaseActivity extends FragmentActivity {
      */
     public void initRunningAPP() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> runningServices = manager.getRunningServices(100);
+        List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = manager.getRunningAppProcesses();
         for (String packageName : mNotSystemApps.keySet()) {
-            AppInfo appInfo = mNotSystemApps.get(packageName);
-            appInfo.setRun(false);
-            for (ActivityManager.RunningServiceInfo info : runningServices) {
-                if (packageName.equals(info.service.getPackageName())) {
+            mNotSystemApps.get(packageName).setRun(false);
+        }
+        AppInfo appInfo;
+        for (ActivityManager.RunningAppProcessInfo info : runningAppProcesses) {
+            for (String pkgName : info.pkgList) {
+                if (mNotSystemApps.containsKey(pkgName)) {
+                    appInfo = mNotSystemApps.get(pkgName);
                     appInfo.setRun(true);
-                    appInfo.setPid(info.pid);
+                    appInfo.addProcessName(info.processName);
+                    appInfo.addPid(info.pid);
+                    android.util.Log.i("ljh", info.processName + " pkgName " + pkgName);
                 }
             }
         }

@@ -14,6 +14,7 @@ import com.openthos.greenify.R;
 import com.openthos.greenify.app.Constants;
 import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.listener.OnListClickListener;
+import com.openthos.greenify.utils.ToolUtils;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class AppListAdapter extends BasicAdapter {
         holder.icon.setImageDrawable(appInfo.getIcon());
         holder.name.setText(appInfo.getAppName());
         holder.cpu.setText(appInfo.getCpuUsage());
-        holder.memory.setText(appInfo.getMemoryUsage());
+        holder.memory.setText(ToolUtils.transformFileSize(appInfo.getMemoryUsage(mContext)));
         holder.battery.setText(appInfo.getBatteryUsage());
 
         switch (appInfo.getDormantState()) {

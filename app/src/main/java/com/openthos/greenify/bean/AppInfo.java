@@ -1,16 +1,23 @@
 package com.openthos.greenify.bean;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Debug;
 
 import com.openthos.greenify.app.Constants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AppInfo {
+    private ActivityManager mManager;
     private String appName;
     private String packageName;
+    private List<String> processNames;
     private Drawable icon;
-    private int pid;
+    private List<Integer> pids;
     private float cpuUsage;
     private long memoryUsage;
     private String batteryUsage;
@@ -19,6 +26,8 @@ public class AppInfo {
     private boolean isNonDormant;
 
     public AppInfo() {
+        pids = new ArrayList<>();
+        processNames = new ArrayList<>();
     }
 
     public String getAppName() {
@@ -37,6 +46,16 @@ public class AppInfo {
         this.packageName = packageName;
     }
 
+    public List<String> getProcessNames() {
+        return processNames;
+    }
+
+    public void addProcessName(String processName) {
+        if (!processNames.contains(processName)) {
+            processNames.add(processName);
+        }
+    }
+
     public Drawable getIcon() {
         return icon;
     }
@@ -45,19 +64,18 @@ public class AppInfo {
         this.icon = icon;
     }
 
-    public String getPid() {
-        if (pid == 0){
-            return "";
-        }
-        return String.valueOf(pid);
+    public List<Integer> getPids() {
+        return pids;
     }
 
-    public void setPid(int pid) {
-        this.pid = pid;
+    public void addPid(int pid) {
+        if (!pids.contains(pid)) {
+            pids.add(pid);
+        }
     }
 
     public String getCpuUsage() {
-        if (cpuUsage == 0){
+        if (cpuUsage == 0) {
             return "";
         }
         return cpuUsage + "%";
@@ -67,19 +85,26 @@ public class AppInfo {
         this.cpuUsage = cpuUsage;
     }
 
-    public String getMemoryUsage() {
-        if (memoryUsage == 0){
-            return "";
+    public long getMemoryUsage(Context context) {
+        memoryUsage = 0;
+        if (pids.size() != 0) {
+            if (mManager == null) {
+                mManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            }
+            for (Integer pid : pids) {
+                memoryUsage +=
+                        mManager.getProcessMemoryInfo(new int[]{pid})[0].getTotalPrivateDirty();
+            }
         }
-        return String.valueOf(memoryUsage);
+        return memoryUsage * Constants.KB;
     }
 
     public void setMemoryUsage(long memoryUsage) {
-        this.memoryUsage = memoryUsage;
+        this.memoryUsage += memoryUsage;
     }
 
     public String getBatteryUsage() {
-        if (batteryUsage == null){
+        if (batteryUsage == null) {
             return "";
         }
         return batteryUsage;
@@ -95,6 +120,9 @@ public class AppInfo {
 
     public void setRun(boolean run) {
         isRun = run;
+        if (!run) {
+            setStop();
+        }
     }
 
     public boolean isDormant() {
@@ -121,6 +149,11 @@ public class AppInfo {
             return Constants.APP_NON_DORMANT;
         }
         return Constants.App_NON_DEAL;
+    }
+
+    public void setStop() {
+        processNames.clear();
+        pids.clear();
     }
 
     public Intent getIntent(Context context) {

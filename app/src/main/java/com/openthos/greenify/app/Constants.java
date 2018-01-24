@@ -10,4 +10,6 @@ public class Constants {
     public static final int APP_NON_DORMANT = 0;
     public static final int APP_HAVE_DORMANT = 1;
     public static final int APP_WAIT_DORMANT = 2;
+    public static final int MB = 1024 * 1024;
+    public static final int KB = 1024;
 }
