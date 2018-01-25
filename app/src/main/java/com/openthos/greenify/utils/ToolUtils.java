@@ -23,4 +23,8 @@ public class ToolUtils {
         DecimalFormat format = new DecimalFormat("0.00");
         return format.format(formatSize) + unit;
     }
+
+    public static String getNumTwoBitPercent(double num) {
+        return ((int) (num * 10000)) / 100.0 + "%";
+    }
 }

@@ -12,4 +12,8 @@ public class Constants {
     public static final int APP_WAIT_DORMANT = 2;
     public static final int MB = 1024 * 1024;
     public static final int KB = 1024;
+
+    public static int DELAY_TIME_REFRESH = 1000;
+    public static int TIME_CPU_REFRESH = 2000;
+
 }

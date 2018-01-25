@@ -126,7 +126,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
             public void run() {
                 refresh();
             }
-        }, DELAY_TIME_REFRESH);
+        }, Constants.DELAY_TIME_REFRESH);
     }
 
     /**

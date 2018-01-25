@@ -20,7 +20,6 @@ import com.openthos.greenify.utils.DormantAppUtils;
 import com.openthos.greenify.utils.NonDormantAppUtils;
 
 public abstract class BaseActivity extends FragmentActivity {
-    public static int DELAY_TIME_REFRESH = 1000;
 
     private static Map<String, AppInfo> mNotSystemApps;
 
@@ -153,7 +152,6 @@ public abstract class BaseActivity extends FragmentActivity {
                     appInfo.setRun(true);
                     appInfo.addProcessName(info.processName);
                     appInfo.addPid(info.pid);
-                    android.util.Log.i("ljh", info.processName + " pkgName " + pkgName);
                 }
             }
         }
