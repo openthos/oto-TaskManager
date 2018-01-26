@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     private ImageView mRefresh;
     private ListView mListView;
     private View mLastView;
+    private AppInstallReceiver mAppInstallReceiver;
 
     @Override
     public int getLayoutId() {
@@ -58,6 +61,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     public void initData() {
         mHandler = new Handler();
         registSreenStatusReceiver();
+        registAppInstallReceiver();
         initAppInfos();
         mDatas = new ArrayList<>();
         mAdapter = new AppLayoutAdapter(this, mDatas);
@@ -140,11 +144,25 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         registerReceiver(mScreenStatusReceiver, filter);
     }
 
+    private void registAppInstallReceiver() {
+        mAppInstallReceiver = new AppInstallReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        registerReceiver(mAppInstallReceiver, filter);
+    }
+
     @Override
     protected void onDestroy() {
         if (mScreenStatusReceiver != null) {
             unregisterReceiver(mScreenStatusReceiver);
             mScreenStatusReceiver = null;
+        }
+        if (mAppInstallReceiver != null) {
+            unregisterReceiver(mAppInstallReceiver);
+            mAppInstallReceiver = null;
         }
         super.onDestroy();
     }
@@ -229,5 +247,41 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                     break;
             }
         }
+    }
+
+    private class AppInstallReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Map<String, AppInfo> appInfosMap = getAppInfosMap();
+            String packageName = intent.getData().getSchemeSpecificPart();
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_ADDED:
+                    AppInfo appInfo = getAppInfo(packageName);
+                    if (appInfo != null) {
+                        appInfosMap.put(packageName, appInfo);
+                    }
+                    break;
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    appInfosMap.remove(packageName);
+                    break;
+                case Intent.ACTION_PACKAGE_REPLACED:
+                    break;
+            }
+        }
+    }
+
+    private AppInfo getAppInfo(String packageName) {
+        PackageManager manager = getPackageManager();
+        try {
+            ApplicationInfo info = manager.getApplicationInfo(packageName, 0);
+            AppInfo appInfo = new AppInfo();
+            appInfo.setAppName(info.loadLabel(manager).toString());
+            appInfo.setIcon(info.loadIcon(manager));
+            appInfo.setPackageName(packageName);
+            return appInfo;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
