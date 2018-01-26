@@ -20,4 +20,12 @@
     <string name="wait_dormant">待休眠</string>
     <string name="non_dormant">无需休眠</string>
     <string name="add_or_remove">添加/移除</string>
+    <string name="cpu_frequence">CPU主频：%.2fGHz</string>
+    <string name="cpu_use">CPU占用：%.2f%%</string>
+    <string name="battery_state">电池状态：%s</string>
+    <string name="battery_charge">当前电量：%d%%</string>
+    <string name="charging">充电中</string>
+    <string name="discharging">未充电</string>
+    <string name="battery_full">充满</string>
+    <string name="battery_none">无电池</string>
 </resources>

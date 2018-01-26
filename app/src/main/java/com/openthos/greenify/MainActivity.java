@@ -6,17 +6,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.openthos.greenify.adapter.AppLayoutAdapter;
 import com.openthos.greenify.app.Constants;
 import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.bean.AppLayoutInfo;
 import com.openthos.greenify.listener.OnListClickListener;
+import com.openthos.greenify.utils.DeviceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.Map;
 
 public class MainActivity extends BaseActivity implements OnListClickListener, View.OnClickListener {
     private Handler mHandler;
+    private double mCpuMaxFreqGHz;
     private List<AppLayoutInfo> mDatas;
     private AppLayoutAdapter mAdapter;
 
@@ -40,11 +45,17 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     private String mSelectPkgName;
 
     private ScreenStatusReceiver mScreenStatusReceiver;
+    private AppInstallReceiver mAppInstallReceiver;
+    private BatteryChangeReceiver mBatteryChangeReceiver;
 
     private ImageView mRefresh;
     private ListView mListView;
     private View mLastView;
-    private AppInstallReceiver mAppInstallReceiver;
+
+    private TextView mCpuFrequence;
+    private TextView mCpuUse;
+    private TextView mBattertState;
+    private TextView mBatteryCharge;
 
     @Override
     public int getLayoutId() {
@@ -55,6 +66,10 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     public void initView() {
         mRefresh = (ImageView) findViewById(R.id.refresh);
         mListView = (ListView) findViewById(R.id.listview);
+        mCpuFrequence = (TextView) findViewById(R.id.cpu_frquence);
+        mCpuUse = (TextView) findViewById(R.id.cpu_use);
+        mBattertState = (TextView) findViewById(R.id.battery_state);
+        mBatteryCharge = (TextView) findViewById(R.id.battery_charge);
     }
 
     @Override
@@ -62,6 +77,10 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         mHandler = new Handler();
         registSreenStatusReceiver();
         registAppInstallReceiver();
+        registBatteryReceiver();
+        mCpuMaxFreqGHz = DeviceUtils.getCPUMaxFreqGHz();
+        mCpuFrequence.setText(
+                getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
         initAppInfos();
         mDatas = new ArrayList<>();
         mAdapter = new AppLayoutAdapter(this, mDatas);
@@ -154,6 +173,13 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         registerReceiver(mAppInstallReceiver, filter);
     }
 
+    private void registBatteryReceiver() {
+        mBatteryChangeReceiver = new BatteryChangeReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(mBatteryChangeReceiver, filter);
+    }
+
     @Override
     protected void onDestroy() {
         if (mScreenStatusReceiver != null) {
@@ -163,6 +189,11 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         if (mAppInstallReceiver != null) {
             unregisterReceiver(mAppInstallReceiver);
             mAppInstallReceiver = null;
+        }
+
+        if (mBatteryChangeReceiver != null) {
+            unregisterReceiver(mBatteryChangeReceiver);
+            mBatteryChangeReceiver = null;
         }
         super.onDestroy();
     }
@@ -244,6 +275,38 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                     break;
                 case Intent.ACTION_SCREEN_ON:
                     loadData();
+                    break;
+            }
+        }
+    }
+
+    private class BatteryChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+            int level = extras.getInt(BatteryManager.EXTRA_LEVEL, 0);
+            int status = extras.getInt(BatteryManager.EXTRA_STATUS);
+            mBatteryCharge.setVisibility(View.VISIBLE);
+            switch (status) {
+                case BatteryManager.BATTERY_STATUS_CHARGING:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.charging)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                case BatteryManager.BATTERY_STATUS_DISCHARGING:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.discharging)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                case BatteryManager.BATTERY_STATUS_FULL:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.battery_full)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                default:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.battery_none)));
+                    mBatteryCharge.setVisibility(View.GONE);
                     break;
             }
         }
