@@ -9,19 +9,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.openthos.greenify.bean.AppInfo;
+import com.openthos.greenify.listener.OnCpuChangeListener;
 import com.openthos.greenify.utils.DormantAppUtils;
 import com.openthos.greenify.utils.NonDormantAppUtils;
 
 public abstract class BaseActivity extends FragmentActivity {
 
     private static Map<String, AppInfo> mNotSystemApps;
+    private static String ONE_OR_MORE_SPACE = "\\s+";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -133,6 +137,59 @@ public abstract class BaseActivity extends FragmentActivity {
     public Map<String, AppInfo> getAppInfosMap() {
         initRunningAPP();
         return mNotSystemApps;
+    }
+
+    /**
+     * init cpu info
+     *
+     * @param cpuChangeListener
+     */
+    public void initCpuInfo(OnCpuChangeListener cpuChangeListener) {
+        Process process;
+        BufferedReader reader;
+        try {
+            process = Runtime.getRuntime().exec("/system/bin/top -n 1");
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            boolean isIgnore = true;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.contains("User") && line.contains("System")) {
+                    isIgnore = true;
+                    String replace = line.replace("User", "").replace("System", "")
+                            .replace("IOW", "").replace("IRQ", "").replace("%", "").replace(" ", "");
+                    String[] split = replace.split(",");
+                    double totalCpuUsed = 0.0;
+                    for (String s : split) {
+                        totalCpuUsed += Integer.parseInt(s);
+                    }
+                    cpuChangeListener.cpuUse(totalCpuUsed);
+                } else if (line.contains("PID")) {
+                    isIgnore = false;
+                } else if (!isIgnore) {
+                    String[] split = line.replace("%", "").split(ONE_OR_MORE_SPACE);
+                    double cpuUsed = Double.parseDouble(split[2]);
+                    if (split.length == 10 && cpuUsed > 0) {
+                        if (cpuUsed > 0) {
+                            for (String packageName : mNotSystemApps.keySet()) {
+                                AppInfo appInfo = mNotSystemApps.get(packageName);
+                                for (int pid : appInfo.getPids()) {
+                                    if (split[0].equals(String.valueOf(pid))) {
+                                        appInfo.addCpuUsage(cpuUsed);
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+            cpuChangeListener.loadComplete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

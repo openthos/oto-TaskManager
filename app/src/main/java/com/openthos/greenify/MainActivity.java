@@ -19,12 +19,15 @@ import com.openthos.greenify.adapter.AppLayoutAdapter;
 import com.openthos.greenify.app.Constants;
 import com.openthos.greenify.bean.AppInfo;
 import com.openthos.greenify.bean.AppLayoutInfo;
+import com.openthos.greenify.listener.OnCpuChangeListener;
 import com.openthos.greenify.listener.OnListClickListener;
 import com.openthos.greenify.utils.DeviceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends BaseActivity implements OnListClickListener, View.OnClickListener {
     private Handler mHandler;
@@ -44,9 +47,12 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     //Currently selected application package name
     private String mSelectPkgName;
 
+    private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(3);
+
     private ScreenStatusReceiver mScreenStatusReceiver;
     private AppInstallReceiver mAppInstallReceiver;
     private BatteryChangeReceiver mBatteryChangeReceiver;
+    private RefreshRunnable mRefreshRunnable;
 
     private ImageView mRefresh;
     private ListView mListView;
@@ -75,12 +81,13 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     @Override
     public void initData() {
         mHandler = new Handler();
+        mRefreshRunnable = new RefreshRunnable();
         registSreenStatusReceiver();
         registAppInstallReceiver();
         registBatteryReceiver();
         mCpuMaxFreqGHz = DeviceUtils.getCPUMaxFreqGHz();
-        mCpuFrequence.setText(
-                getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
+        mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
+        mCpuUse.setText(getString(R.string.cpu_use, 0.0));
         initAppInfos();
         mDatas = new ArrayList<>();
         mAdapter = new AppLayoutAdapter(this, mDatas);
@@ -91,6 +98,8 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         mHaveDormants = new ArrayList<>();
         mNonNeedDormants = new ArrayList<>();
         mWaitDormants = new ArrayList<>();
+        loadData();
+        mAdapter.refreshList();
         refresh();
     }
 
@@ -138,16 +147,14 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         if (mHaveDormants.size() != 0) {
             mDatas.add(new AppLayoutInfo(getString(R.string.have_dormant), mHaveDormants));
         }
-        mAdapter.refreshList();
     }
 
     @Override
     public void refresh() {
-        loadData();
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                refresh();
+                mFixedThreadPool.execute(mRefreshRunnable);
             }
         }, Constants.DELAY_TIME_REFRESH);
     }
@@ -330,6 +337,36 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                 case Intent.ACTION_PACKAGE_REPLACED:
                     break;
             }
+        }
+    }
+
+    private class RefreshRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            loadData();
+            initCpuInfo(new OnCpuChangeListener() {
+                @Override
+                public void cpuUse(final double cpuUse) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCpuUse.setText(getString(R.string.cpu_use, cpuUse));
+                        }
+                    });
+                }
+
+                @Override
+                public void loadComplete() {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.refreshList();
+                        }
+                    });
+                    refresh();
+                }
+            });
         }
     }
 

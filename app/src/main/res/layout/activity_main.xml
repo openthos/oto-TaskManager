@@ -50,8 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="@dimen/padding_fifteen"
-            android:text="@string/cpu_use"
-            android:visibility="gone"/>
+            android:text="@string/cpu_use"/>
 
         <TextView
             android:id="@+id/battery_state"
@@ -68,6 +67,11 @@
             android:layout_height="match_parent"
             android:text="@string/battery_charge"/>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line"/>
 
     <ListView
         android:id="@+id/listview"

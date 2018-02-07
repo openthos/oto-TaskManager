@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
 import com.openthos.greenify.app.Constants;
-import com.openthos.greenify.utils.ToolUtils;
 
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +23,6 @@ public class AppInfo {
     private boolean isRun;
     private boolean isDormant;
     private boolean isNonDormant;
-
-    private Long lastCpuTime;
-    private Long lastAppCpuTime;
-    private RandomAccessFile procStatFile;
-    private RandomAccessFile appStatFile;
 
     public AppInfo() {
         pids = new ArrayList<>();
@@ -81,14 +74,11 @@ public class AppInfo {
     }
 
     public String getCpuUsage() {
-        if (pids.size() != 0) {
-            cpuUsage = sampleCPU(pids.get(0));
-        }
-        return ToolUtils.getNumTwoBitPercent(cpuUsage);
+        return cpuUsage + "%";
     }
 
-    public void setCpuUsage(double cpuUsage) {
-        this.cpuUsage = cpuUsage;
+    public void addCpuUsage(double cpuUsage) {
+        this.cpuUsage += cpuUsage;
     }
 
     public long getMemoryUsage(Context context) {
@@ -160,54 +150,12 @@ public class AppInfo {
     public void setStop() {
         processNames.clear();
         pids.clear();
+        cpuUsage = 0;
     }
 
     public Intent getIntent(Context context) {
         Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
-    }
-
-    private double sampleCPU(int pid) {
-        long cpuTime;
-        long appTime;
-        double sampleValue = 0.0D;
-
-        try {
-            if (procStatFile == null || appStatFile == null) {
-                procStatFile = new RandomAccessFile("/proc/stat", "r");
-                appStatFile = new RandomAccessFile("/proc/" + pid + "/stat", "r");
-            } else {
-                procStatFile.seek(0L);
-                appStatFile.seek(0L);
-            }
-
-            String procStatString = procStatFile.readLine();
-            String appStatString = appStatFile.readLine();
-
-            String procStats[] = procStatString.split(" ");
-            String appStats[] = appStatString.split(" ");
-
-            cpuTime = Long.parseLong(procStats[2]) + Long.parseLong(procStats[3])
-                    + Long.parseLong(procStats[4]) + Long.parseLong(procStats[5])
-                    + Long.parseLong(procStats[6]) + Long.parseLong(procStats[7])
-                    + Long.parseLong(procStats[8]);
-            appTime = Long.parseLong(appStats[13]) + Long.parseLong(appStats[14]);
-
-            if (lastCpuTime == null && lastAppCpuTime == null) {
-                lastCpuTime = cpuTime;
-                lastAppCpuTime = appTime;
-                return sampleValue;
-            }
-
-            sampleValue = ((double) (appTime - lastAppCpuTime) / (double) (cpuTime - lastCpuTime));
-            if (cpuTime - lastCpuTime > Constants.TIME_CPU_REFRESH) {
-                lastCpuTime = cpuTime;
-                lastAppCpuTime = appTime;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return sampleValue;
     }
 }
