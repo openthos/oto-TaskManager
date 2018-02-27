@@ -55,6 +55,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     private RefreshRunnable mRefreshRunnable;
 
     private ImageView mRefresh;
+    private ImageView mClean;
     private ListView mListView;
     private View mLastView;
 
@@ -71,6 +72,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     @Override
     public void initView() {
         mRefresh = (ImageView) findViewById(R.id.refresh);
+        mClean = (ImageView) findViewById(R.id.clean);
         mListView = (ListView) findViewById(R.id.listview);
         mCpuFrequence = (TextView) findViewById(R.id.cpu_frquence);
         mCpuUse = (TextView) findViewById(R.id.cpu_use);
@@ -106,6 +108,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     @Override
     public void initListener() {
         mRefresh.setOnClickListener(this);
+        mClean.setOnClickListener(this);
         mAdapter.setOnListClickListener(this);
     }
 
@@ -259,6 +262,25 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.refresh:
+                loadData();
+                break;
+            case R.id.clean:
+                stopRunningApp();
+                break;
+        }
+    }
+
+    private void stopRunningApp() {
+        Map<String, AppInfo> appInfosMap = getAppInfosMap();
+        for (String packageName : appInfosMap.keySet()) {
+            AppInfo appInfo = getAppInfoByPkgName(packageName);
+            if (appInfo.isRun() && (appInfo.getDormantState() == Constants.APP_WAIT_DORMANT
+                    || appInfo.getDormantState() == Constants.App_NON_DEAL)) {
+                forceStopAPK(packageName);
+            }
+        }
         loadData();
     }
 
@@ -272,13 +294,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-                    Map<String, AppInfo> appInfosMap = getAppInfosMap();
-                    for (String packageName : appInfosMap.keySet()) {
-                        AppInfo appInfo = getAppInfoByPkgName(packageName);
-                        if (appInfo.getDormantState() == Constants.APP_WAIT_DORMANT) {
-                            forceStopAPK(packageName);
-                        }
-                    }
+                    stopRunningApp();
                     break;
                 case Intent.ACTION_SCREEN_ON:
                     loadData();
