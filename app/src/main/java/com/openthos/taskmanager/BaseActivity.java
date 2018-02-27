@@ -1,4 +1,4 @@
-package com.openthos.greenify;
+package com.openthos.taskmanager;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.openthos.greenify.bean.AppInfo;
-import com.openthos.greenify.listener.OnCpuChangeListener;
-import com.openthos.greenify.utils.DormantAppUtils;
-import com.openthos.greenify.utils.NonDormantAppUtils;
+import com.openthos.taskmanager.bean.AppInfo;
+import com.openthos.taskmanager.listener.OnCpuChangeListener;
+import com.openthos.taskmanager.utils.DormantAppUtils;
+import com.openthos.taskmanager.utils.NonDormantAppUtils;
 
 public abstract class BaseActivity extends FragmentActivity {
 

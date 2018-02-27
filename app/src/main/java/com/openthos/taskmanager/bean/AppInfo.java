@@ -1,11 +1,11 @@
-package com.openthos.greenify.bean;
+package com.openthos.taskmanager.bean;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
-import com.openthos.greenify.app.Constants;
+import com.openthos.taskmanager.app.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

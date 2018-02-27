@@ -1,4 +1,4 @@
-package com.openthos.greenify.view;
+package com.openthos.taskmanager.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.ListView;
 
-import com.openthos.greenify.app.Constants;
+import com.openthos.taskmanager.app.Constants;
 
 public class CustomListView extends ListView {
     private boolean isDisableScroll = true;

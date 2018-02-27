@@ -1,9 +1,9 @@
-package com.openthos.greenify.utils;
+package com.openthos.taskmanager.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.openthos.greenify.app.Constants;
+import com.openthos.taskmanager.app.Constants;
 
 import java.util.Map;
 

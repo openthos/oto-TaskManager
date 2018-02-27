@@ -1,6 +1,6 @@
-package com.openthos.greenify.utils;
+package com.openthos.taskmanager.utils;
 
-import com.openthos.greenify.app.Constants;
+import com.openthos.taskmanager.app.Constants;
 
 import java.text.DecimalFormat;
 

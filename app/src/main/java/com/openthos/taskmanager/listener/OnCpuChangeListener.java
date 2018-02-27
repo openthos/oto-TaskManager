@@ -1,4 +1,4 @@
-package com.openthos.greenify.listener;
+package com.openthos.taskmanager.listener;
 
 public interface OnCpuChangeListener {
     void cpuUse(double cpuUse);

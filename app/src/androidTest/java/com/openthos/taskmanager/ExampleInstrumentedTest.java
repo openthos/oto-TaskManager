@@ -1,4 +1,4 @@
-package com.openthos.greenify;
+package com.openthos.taskmanager;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

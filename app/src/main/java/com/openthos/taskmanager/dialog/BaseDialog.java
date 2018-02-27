@@ -1,4 +1,4 @@
-package com.openthos.greenify.dialog;
+package com.openthos.taskmanager.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.openthos.greenify.MainActivity;
-import com.openthos.greenify.R;
-import com.openthos.greenify.adapter.MenuAdapter;
-import com.openthos.greenify.bean.DialogType;
+import com.openthos.taskmanager.MainActivity;
+import com.openthos.taskmanager.R;
+import com.openthos.taskmanager.adapter.MenuAdapter;
+import com.openthos.taskmanager.bean.DialogType;
 
 public class BaseDialog extends Dialog{
     private static BaseDialog mBaseDialog;

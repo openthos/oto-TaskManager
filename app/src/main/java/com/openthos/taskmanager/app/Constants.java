@@ -1,4 +1,4 @@
-package com.openthos.greenify.app;
+package com.openthos.taskmanager.app;
 
 public class Constants {
     public static final String SP_DORMANT_APP = "dormant_app";

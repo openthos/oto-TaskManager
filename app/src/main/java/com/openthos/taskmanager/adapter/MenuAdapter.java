@@ -1,4 +1,4 @@
-package com.openthos.greenify.adapter;
+package com.openthos.taskmanager.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import com.openthos.greenify.R;
+import com.openthos.taskmanager.R;
 
 public class MenuAdapter extends BasicAdapter {
     private List<String> mDatas;

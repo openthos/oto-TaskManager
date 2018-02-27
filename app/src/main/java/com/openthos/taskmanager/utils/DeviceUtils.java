@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-package com.openthos.greenify.utils;
+package com.openthos.taskmanager.utils;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;

@@ -1,4 +1,4 @@
-package com.openthos.greenify.adapter;
+package com.openthos.taskmanager.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,10 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.openthos.greenify.R;
-import com.openthos.greenify.bean.AppLayoutInfo;
-import com.openthos.greenify.listener.OnListClickListener;
-import com.openthos.greenify.view.CustomListView;
+import com.openthos.taskmanager.R;
+import com.openthos.taskmanager.bean.AppLayoutInfo;
+import com.openthos.taskmanager.listener.OnListClickListener;
+import com.openthos.taskmanager.view.CustomListView;
 
 import java.util.List;
 

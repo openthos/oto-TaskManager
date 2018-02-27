@@ -1,4 +1,4 @@
-package com.openthos.greenify.adapter;
+package com.openthos.taskmanager.adapter;
 
 import android.content.Context;
 import android.widget.BaseAdapter;

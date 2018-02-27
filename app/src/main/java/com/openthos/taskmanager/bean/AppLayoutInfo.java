@@ -1,4 +1,4 @@
-package com.openthos.greenify.bean;
+package com.openthos.taskmanager.bean;
 
 import java.util.List;
 

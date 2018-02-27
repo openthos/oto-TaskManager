@@ -1,4 +1,4 @@
-package com.openthos.greenify;
+package com.openthos.taskmanager;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,13 +15,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.openthos.greenify.adapter.AppLayoutAdapter;
-import com.openthos.greenify.app.Constants;
-import com.openthos.greenify.bean.AppInfo;
-import com.openthos.greenify.bean.AppLayoutInfo;
-import com.openthos.greenify.listener.OnCpuChangeListener;
-import com.openthos.greenify.listener.OnListClickListener;
-import com.openthos.greenify.utils.DeviceUtils;
+import com.openthos.taskmanager.adapter.AppLayoutAdapter;
+import com.openthos.taskmanager.app.Constants;
+import com.openthos.taskmanager.bean.AppInfo;
+import com.openthos.taskmanager.bean.AppLayoutInfo;
+import com.openthos.taskmanager.listener.OnCpuChangeListener;
+import com.openthos.taskmanager.listener.OnListClickListener;
+import com.openthos.taskmanager.utils.DeviceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
