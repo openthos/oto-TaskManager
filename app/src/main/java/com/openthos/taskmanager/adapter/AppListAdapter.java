@@ -59,31 +59,16 @@ public class AppListAdapter extends BasicAdapter {
         holder.memory.setText(ToolUtils.transformFileSize(appInfo.getMemoryUsage(mContext)));
         holder.battery.setText(appInfo.getBatteryUsage());
 
-        switch (appInfo.getDormantState()) {
-            case Constants.APP_WAIT_DORMANT:
-                holder.dormant.setVisibility(View.VISIBLE);
-                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
-                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
-                break;
-            case Constants.APP_HAVE_DORMANT:
-                holder.dormant.setVisibility(View.GONE);
-                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
-                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
-                break;
+        switch (appInfo.getDormantState()){
             case Constants.APP_NON_DORMANT:
-                holder.dormant.setVisibility(View.GONE);
-                holder.img1.setBackground(getDrawable(R.mipmap.o_remove));
-                holder.img2.setBackground(getDrawable(R.mipmap.o_dormant));
+                holder.add.setBackground(getDrawable(R.mipmap.o_remove));
                 break;
             case Constants.App_NON_DEAL:
-                holder.dormant.setVisibility(View.VISIBLE);
-                holder.img1.setBackground(getDrawable(R.mipmap.o_dormant));
-                holder.img2.setBackground(getDrawable(R.mipmap.o_protect));
+                holder.add.setBackground(getDrawable(R.mipmap.o_protect));
                 break;
         }
-        holder.img1.setTag(appInfo.getPackageName());
-        holder.img2.setTag(appInfo.getPackageName());
         holder.dormant.setTag(appInfo.getPackageName());
+        holder.add.setTag(appInfo.getPackageName());
         holder.layout.setTag(appInfo.getPackageName());
         return convertView;
     }
@@ -108,8 +93,7 @@ public class AppListAdapter extends BasicAdapter {
         private TextView cpu;
         private TextView memory;
         private TextView battery;
-        private ImageView img1;
-        private ImageView img2;
+        private ImageView add;
         private ImageView dormant;
         ;
 
@@ -120,12 +104,10 @@ public class AppListAdapter extends BasicAdapter {
             cpu = (TextView) view.findViewById(R.id.cpu_usage);
             memory = (TextView) view.findViewById(R.id.memory_usage);
             battery = (TextView) view.findViewById(R.id.battery_usage);
-            img1 = (ImageView) view.findViewById(R.id.img1);
-            img2 = (ImageView) view.findViewById(R.id.img2);
+            add = (ImageView) view.findViewById(R.id.add_or_remove);
             dormant = (ImageView) view.findViewById(R.id.dormant);
             layout.setOnClickListener(this);
-            img1.setOnClickListener(this);
-            img2.setOnClickListener(this);
+            add.setOnClickListener(this);
             dormant.setOnClickListener(this);
             layout.setOnHoverListener(this);
         }

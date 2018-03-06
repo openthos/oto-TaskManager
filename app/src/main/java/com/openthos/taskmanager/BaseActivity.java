@@ -45,7 +45,6 @@ public abstract class BaseActivity extends FragmentActivity {
         }
         PackageManager manager = getPackageManager();
         List<PackageInfo> packageInfos = manager.getInstalledPackages(0);
-        Map<String, String> dormantMaps = DormantAppUtils.getInstance(this).getAllAddedApp();
         Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(this).getAllAddedApp();
         AppInfo appInfo;
         for (PackageInfo packageInfo : packageInfos) {
@@ -57,11 +56,6 @@ public abstract class BaseActivity extends FragmentActivity {
             appInfo.setPackageName(packageInfo.packageName);
 
             appInfo.setIcon(packageInfo.applicationInfo.loadIcon(manager));
-            if (dormantMaps != null && dormantMaps.containsKey(appInfo.getPackageName())) {
-                appInfo.setDormant(true);
-            } else {
-                appInfo.setDormant(false);
-            }
             if (nonDormantMaps != null && nonDormantMaps.containsKey(appInfo.getPackageName())) {
                 appInfo.setNonDormant(true);
             } else {

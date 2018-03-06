@@ -84,19 +84,6 @@
             android:background="@color/line"
             android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/add_or_remove"
-            style="@style/ItemTextStyle"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/add_or_remove"
-            />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/line"/>
 
         <TextView
             android:id="@+id/dormant"
@@ -106,6 +93,20 @@
             android:layout_weight="1"
             android:text="@string/dormant"
             />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <TextView
+            android:id="@+id/add_or_remove"
+            style="@style/ItemTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+
     </LinearLayout>
 
     <View

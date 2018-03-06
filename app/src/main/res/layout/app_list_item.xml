@@ -90,20 +90,14 @@
             android:layout_weight="1">
 
             <ImageView
-                android:id="@+id/img1"
+                android:id="@+id/dormant"
                 android:layout_width="@dimen/image_size"
                 android:layout_height="@dimen/image_size"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/padding_ten"
+                android:src="@mipmap/sleep"
                 />
 
-            <ImageView
-                android:id="@+id/img2"
-                android:layout_width="@dimen/image_size"
-                android:layout_height="@dimen/image_size"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/padding_ten"
-                />
         </LinearLayout>
 
         <View
@@ -117,13 +111,13 @@
             android:layout_weight="1">
 
             <ImageView
-                android:id="@+id/dormant"
+                android:id="@+id/add_or_remove"
                 android:layout_width="@dimen/image_size"
                 android:layout_height="@dimen/image_size"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/padding_ten"
-                android:src="@mipmap/un_dormant"
                 />
+
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

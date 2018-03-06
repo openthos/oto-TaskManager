@@ -138,9 +138,6 @@ public class AppInfo {
     }
 
     public int getDormantState() {
-        if (isDormant()) {
-            return isRun() ? Constants.APP_WAIT_DORMANT : Constants.APP_HAVE_DORMANT;
-        }
         if (isNonDormant()) {
             return Constants.APP_NON_DORMANT;
         }

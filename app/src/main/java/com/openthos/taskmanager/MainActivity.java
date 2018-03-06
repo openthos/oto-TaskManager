@@ -35,9 +35,6 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     private List<AppLayoutInfo> mDatas;
     private AppLayoutAdapter mAdapter;
 
-    //Storage already dormant application
-    private List<AppInfo> mHaveDormants;
-
     //Storage of non dormant applications
     private List<AppInfo> mWaitDormants;
 
@@ -97,11 +94,9 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
         mListView.addHeaderView(
                 LayoutInflater.from(this).inflate(R.layout.main_list_header, null, false));
-        mHaveDormants = new ArrayList<>();
         mNonNeedDormants = new ArrayList<>();
         mWaitDormants = new ArrayList<>();
         loadData();
-        mAdapter.refreshList();
         refresh();
     }
 
@@ -119,37 +114,28 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         mDatas.clear();
         mWaitDormants.clear();
         mNonNeedDormants.clear();
-        mHaveDormants.clear();
 
         Map<String, AppInfo> appInfosMap = getAppInfosMap();
         for (String packageName : appInfosMap.keySet()) {
             AppInfo appInfo = getAppInfoByPkgName(packageName);
-            switch (appInfo.getDormantState()) {
-                case Constants.APP_HAVE_DORMANT:
-                    mHaveDormants.add(appInfo);
-                    break;
-                case Constants.APP_NON_DORMANT:
-                    mNonNeedDormants.add(appInfo);
-                    break;
-                case Constants.APP_WAIT_DORMANT:
-                    mWaitDormants.add(appInfo);
-                    break;
-                case Constants.App_NON_DEAL:
-                    if (appInfo.isRun()) {
+            if (appInfo.isRun()) {
+                switch (appInfo.getDormantState()) {
+                    case Constants.APP_NON_DORMANT:
+                        mNonNeedDormants.add(appInfo);
+                        break;
+                    case Constants.App_NON_DEAL:
                         mWaitDormants.add(appInfo);
-                    }
-                    break;
+                        break;
+                }
             }
-        }
-        if (mWaitDormants.size() != 0) {
-            mDatas.add(new AppLayoutInfo(getString(R.string.wait_dormant), mWaitDormants));
         }
         if (mNonNeedDormants.size() != 0) {
             mDatas.add(new AppLayoutInfo(getString(R.string.non_dormant), mNonNeedDormants));
         }
-        if (mHaveDormants.size() != 0) {
-            mDatas.add(new AppLayoutInfo(getString(R.string.have_dormant), mHaveDormants));
+        if (mWaitDormants.size() != 0) {
+            mDatas.add(new AppLayoutInfo(getString(R.string.wait_dormant), mWaitDormants));
         }
+        mAdapter.refreshList();
     }
 
     @Override
@@ -215,43 +201,12 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                 forceStopAPK(packageName);
                 loadData();
                 break;
-            case R.id.img1:
+            case R.id.add_or_remove:
                 switch (getAppInfoByPkgName(packageName).getDormantState()) {
-                    case Constants.APP_WAIT_DORMANT:
-                        addDormantList(packageName, false);
-                        addNonDormantList(packageName, false);
-                        break;
-                    case Constants.APP_HAVE_DORMANT:
-                        addDormantList(packageName, false);
-                        addNonDormantList(packageName, false);
-                        break;
                     case Constants.APP_NON_DORMANT:
-                        addDormantList(packageName, false);
                         addNonDormantList(packageName, false);
                         break;
                     case Constants.App_NON_DEAL:
-                        addDormantList(packageName, true);
-                        addNonDormantList(packageName, false);
-                        break;
-                }
-                loadData();
-                break;
-            case R.id.img2:
-                switch (getAppInfoByPkgName(packageName).getDormantState()) {
-                    case Constants.APP_WAIT_DORMANT:
-                        addDormantList(packageName, false);
-                        addNonDormantList(packageName, true);
-                        break;
-                    case Constants.APP_HAVE_DORMANT:
-                        addDormantList(packageName, false);
-                        addNonDormantList(packageName, true);
-                        break;
-                    case Constants.APP_NON_DORMANT:
-                        addDormantList(packageName, true);
-                        addNonDormantList(packageName, false);
-                        break;
-                    case Constants.App_NON_DEAL:
-                        addDormantList(packageName, false);
                         addNonDormantList(packageName, true);
                         break;
                 }
@@ -276,8 +231,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         Map<String, AppInfo> appInfosMap = getAppInfosMap();
         for (String packageName : appInfosMap.keySet()) {
             AppInfo appInfo = getAppInfoByPkgName(packageName);
-            if (appInfo.isRun() && (appInfo.getDormantState() == Constants.APP_WAIT_DORMANT
-                    || appInfo.getDormantState() == Constants.App_NON_DEAL)) {
+            if (appInfo.isRun() && appInfo.getDormantState() != Constants.APP_NON_DORMANT) {
                 forceStopAPK(packageName);
             }
         }
@@ -360,7 +314,6 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
         @Override
         public void run() {
-            loadData();
             initCpuInfo(new OnCpuChangeListener() {
                 @Override
                 public void cpuUse(final double cpuUse) {
@@ -377,7 +330,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mAdapter.refreshList();
+                            loadData();
                         }
                     });
                     refresh();
