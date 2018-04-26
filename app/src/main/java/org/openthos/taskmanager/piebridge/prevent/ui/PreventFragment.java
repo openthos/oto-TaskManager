@@ -30,7 +30,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -62,7 +61,6 @@ import org.openthos.taskmanager.listener.OnCpuChangeListener;
 import org.openthos.taskmanager.listener.OnListClickListener;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
 import org.openthos.taskmanager.piebridge.prevent.common.PackageUtils;
-import org.openthos.taskmanager.piebridge.prevent.ui.util.LabelLoader;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.StatusUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.UILog;
 import org.openthos.taskmanager.task.RetrieveInfoTask;
@@ -99,6 +97,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
     private List<AppInfo> mBackgroundDatas;
     private Map<String, AppInfo> mAllDatasMap;
     private double mTotalCpuUsed;
+    private Map<String, Double> mCpuMap;
 
     public PreventFragment() {
     }
@@ -128,10 +127,20 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
 
     @Override
     public void initData() {
+        mDatas = new ArrayList<>();
+        mForwardDatas = new ArrayList<>();
+        mBackgroundDatas = new ArrayList<>();
+        mNonNeedDormants = new ArrayList<>();
+        mAllDatasMap = new HashMap<>();
+        mCpuMap = new HashMap<>();
+
         mActivity = (PreventActivity) getActivity();
         appNotification = PreferenceManager.getDefaultSharedPreferences(mActivity).
                 getBoolean("app_notification", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
-        setNewAdapterIfNeeded(mActivity, true);
+
+        mAdapter = new AppLayoutAdapters(mActivity, mDatas);
+        mListView.setAdapter(mAdapter);
+        mAdapter.setOnListClickListener(this);
         mListView.addHeaderView(
                 LayoutInflater.from(mActivity).inflate(R.layout.main_list_header, null, false));
 
@@ -141,13 +150,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         mCpuMaxFreqGHz = DeviceUtils.getCurCpuFreq();
         mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
         mCpuUse.setText(getString(R.string.cpu_use, 0.0));
-        mDatas = new ArrayList<>();
-        mForwardDatas = new ArrayList<>();
-        mBackgroundDatas = new ArrayList<>();
-        mNonNeedDormants = new ArrayList<>();
-        mAllDatasMap = new HashMap<>();
         initAllDatas();
-        initCpuInfo();
     }
 
     @Override
@@ -176,8 +179,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
                 mAllDatasMap.clear();
                 for (AppInfo appInfo : appInfos) {
                     mAllDatasMap.put(appInfo.getPackageName(), appInfo);
-                    initNoDormantState();
-                    initPreventState();
+                    initAllDataState();
                     loadData();
                 }
             }
@@ -185,19 +187,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
     }
 
     private void initAllDataState() {
-        Map<String, Set<Long>> running = mActivity.getRunningProcesses();
-        for (String packageName : mAllDatasMap.keySet()) {
-            AppInfo appInfo = mAllDatasMap.get(packageName);
-            if (running != null && running.containsKey(packageName)) {
-                appInfo.setRunning(running.get(packageName));
-            } else {
-                appInfo.setRunning(null);
-            }
-            appInfo.setMemoryUsage(getMemorySize(packageName));
-        }
-    }
-
-    private void initNoDormantState() {
+        Map<String, Boolean> preventPackages = mActivity.getPreventPackages();
         Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(mActivity).getAllAddedApp();
         for (String packageName : mAllDatasMap.keySet()) {
             AppInfo appInfo = mAllDatasMap.get(packageName);
@@ -206,13 +196,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
             } else {
                 appInfo.setNonDormant(false);
             }
-        }
-    }
 
-    private void initPreventState() {
-        Map<String, Boolean> preventPackages = mActivity.getPreventPackages();
-        for (String packageName : mAllDatasMap.keySet()) {
-            AppInfo appInfo = mAllDatasMap.get(packageName);
             if (preventPackages != null && preventPackages.containsKey(appInfo.getPackageName())) {
                 appInfo.setAutoPrevent(preventPackages.get(packageName));
             } else {
@@ -221,28 +205,42 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         }
     }
 
-    private double getMemorySize(String pkg) {
+    private void refreshAllDataState() {
+        Map<String, Set<Long>> running = mActivity.getRunningProcesses();
+        for (String packageName : mAllDatasMap.keySet()) {
+            AppInfo appInfo = mAllDatasMap.get(packageName);
+            Set<Long> importances = running.get(packageName);
+            if (running != null && running.containsKey(packageName)) {
+                appInfo.setRunning(importances);
+            } else {
+                appInfo.setRunning(null);
+            }
+            appInfo.setRunDescribe(StatusUtils.formatRunning(mActivity, importances).toString());
+            appInfo.setMemoryUsage(0);
+        }
+        getMemorySize();
+    }
+
+    private void getMemorySize() {
         ActivityManager am = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
         List<AndroidAppProcess> listInfo = ProcessManager.getRunningAppProcesses();
         for (AndroidAppProcess info : listInfo) {
-            if (pkg.equals(info.name)) {
+            AppInfo appInfo = mAllDatasMap.get(info.name);
+            if (appInfo != null) {
                 int[] mempid = new int[]{info.pid};
                 Debug.MemoryInfo[] memoryInfo = am.getProcessMemoryInfo(mempid);
                 double memSize = memoryInfo[0].getTotalPss() / 1024;
-                return memSize;
+                appInfo.setMemoryUsage(memSize);
             }
         }
-        return 0.0;
     }
 
     public void loadData() {
-        Log.i("ljh","loadData");
         mDatas.clear();
         mForwardDatas.clear();
         mNonNeedDormants.clear();
         mBackgroundDatas.clear();
 
-        initAllDataState();
         for (String packageName : mAllDatasMap.keySet()) {
             AppInfo appInfo = mAllDatasMap.get(packageName);
             switch (appInfo.getRunState(mActivity)) {
@@ -270,8 +268,13 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         if (mBackgroundDatas.size() != 0) {
             mDatas.add(new AppLayoutInfo(getString(R.string.background_app), mBackgroundDatas));
         }
-        mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
-        mAdapter.refreshList();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
+                mAdapter.refreshList();
+            }
+        });
     }
 
     private void registBatteryReceiver() {
@@ -457,12 +460,6 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         return mActivity.getPackageManager().getLaunchIntentForPackage(packageName);
     }
 
-    public void refresh(boolean force) {
-        if (mActivity != null) {
-            setNewAdapterIfNeeded(mActivity, force);
-        }
-    }
-
     public void saveListPosition() {
         if (mAdapter != null) {
             int position = mListView.getFirstVisiblePosition();
@@ -478,31 +475,6 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
 
     private Position getListPosition() {
         return positions.get(getClass().getName());
-    }
-
-    private void setNewAdapterIfNeeded(PreventActivity activity, boolean force) {
-        Set<String> names;
-        if (force || prevNames == null) {
-            names = getPreventPkgNames(activity);
-        } else {
-            names = prevNames;
-        }
-        if (force || mAdapter == null || !names.equals(prevNames)) {
-            mAdapter = new AppLayoutAdapters(activity, mDatas);
-            mListView.setAdapter(mAdapter);
-            mAdapter.setOnListClickListener(this);
-            if (prevNames == null) {
-                prevNames = new HashSet<>();
-            }
-            prevNames.clear();
-            prevNames.addAll(names);
-        } else {
-            mAdapter.notifyDataSetChanged();
-            Position position = getListPosition();
-            if (position != null) {
-                mListView.setSelectionFromTop(position.pos, position.top);
-            }
-        }
     }
 
     public void updateTimeIfNeeded(String packageName) {
@@ -539,7 +511,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
     }
 
     public void notifyDataSetChanged() {
-        loadData();
+        mFixedThreadPool.execute(mRefreshRunnable);
     }
 
     @Override
@@ -547,7 +519,6 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         AppInfo appInfo = mAllDatasMap.get(packageName);
         switch (view.getId()) {
             case R.id.layout:
-                Log.i("ljh", "layout");
                 mListView.showContextMenuForChild(view);
                 break;
             case R.id.dormant:
@@ -565,6 +536,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
                     appInfo.setAutoPrevent(!appInfo.isAutoPrevent());
                     mActivity.changePrevent(packageName, appInfo.isAutoPrevent());
                 }
+                loadData();
                 break;
         }
     }
@@ -593,7 +565,6 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         switch (v.getId()) {
             case R.id.refresh:
                 mActivity.retrieveRunning();
-//                loadData();
                 break;
             case R.id.clean:
                 Log.i("ljh", "clean");
@@ -649,14 +620,33 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
 
         @Override
         public void run() {
-            initCpuInfo();
+            initCpuInfo(new OnCpuChangeListener() {
+                @Override
+                public void cpuUse(double cpuUse) {
+                    mTotalCpuUsed = cpuUse;
+                }
+
+                @Override
+                public void loadComplete() {
+                    for (String packageName : mAllDatasMap.keySet()) {
+                        AppInfo appInfo = mAllDatasMap.get(packageName);
+                        if (mCpuMap.containsKey(packageName)) {
+                            appInfo.setCpuUsage(mCpuMap.get(packageName));
+                        } else {
+                            appInfo.clearCpuUsage();
+                        }
+                    }
+                    refreshAllDataState();
+                    loadData();
+                }
+            });
         }
     }
 
     /**
      * init cpu info
      */
-    private void initCpuInfo() {
+    private void initCpuInfo(OnCpuChangeListener onCpuChangeListener) {
         Process process;
         BufferedReader reader;
         try {
@@ -664,9 +654,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
             reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             boolean isIgnore = true;
-            for (String packageName : mAllDatasMap.keySet()) {
-                mAllDatasMap.get(packageName).clearCpuUsage();
-            }
+            mCpuMap.clear();
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.contains("User") && line.contains("System")) {
@@ -678,28 +666,20 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
                     for (String s : split) {
                         mTotalCpuUsed += Integer.parseInt(s);
                     }
+                    onCpuChangeListener.cpuUse(mTotalCpuUsed);
                 } else if (line.contains("PID")) {
                     isIgnore = false;
                 } else if (!isIgnore) {
                     String[] split = line.replace("%", "").split(Constants.ONE_OR_MORE_SPACE);
                     double cpuUsed = Double.parseDouble(split[2]);
                     if (split.length == 10 && cpuUsed > 0) {
-                        if (cpuUsed > 0) {
-                            if (mAllDatasMap.get(split[9]) != null) {
-                                mAllDatasMap.get(split[9]).addCpuUsage(cpuUsed);
-                            }
-                        } else {
-                            break;
-                        }
+                        mCpuMap.put(split[9], cpuUsed);
+                    } else {
+                        break;
                     }
                 }
             }
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mFixedThreadPool.execute(mRefreshRunnable);
-                }
-            }, Constants.DELAY_TIME_REFRESH);
+            onCpuChangeListener.loadComplete();
         } catch (IOException e) {
             e.printStackTrace();
         }

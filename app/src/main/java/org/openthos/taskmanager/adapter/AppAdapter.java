@@ -96,7 +96,7 @@ public class AppAdapter extends BasicAdapter {
         } else {
             holder.iconView.setImageDrawable(appInfo.getIcon());
         }
-        holder.summaryView.setText(appInfo.getDescribeState(mContext));
+        holder.summaryView.setText(appInfo.getRunDescribe());
 
         return convertView;
     }
@@ -111,6 +111,7 @@ public class AppAdapter extends BasicAdapter {
 
     @Override
     public void refreshList() {
+
         Collections.sort(mDatas, new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {

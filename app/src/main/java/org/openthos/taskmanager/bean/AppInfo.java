@@ -16,7 +16,6 @@ import org.openthos.taskmanager.piebridge.prevent.ui.util.StatusUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class AppInfo {
@@ -31,6 +30,7 @@ public class AppInfo {
 
     private int flags;
     private Set<Long> running;
+    private String runDescribe;
 
     private boolean isRun;
     private boolean isDormant;
@@ -101,6 +101,10 @@ public class AppInfo {
         this.cpuUsage += cpuUsage;
     }
 
+    public void setCpuUsage(double cpuUsage) {
+        this.cpuUsage = cpuUsage;
+    }
+
     public void clearCpuUsage() {
         cpuUsage = 0;
     }
@@ -127,6 +131,14 @@ public class AppInfo {
 
     public void setRunning(Set<Long> running) {
         this.running = running;
+    }
+
+    public String getRunDescribe() {
+        return runDescribe;
+    }
+
+    public void setRunDescribe(String runDescribe) {
+        this.runDescribe = runDescribe;
     }
 
     public boolean isRun() {
@@ -238,7 +250,7 @@ public class AppInfo {
             AppInfo appInfo = new AppInfo();
             JSONObject obj = new JSONObject(json);
             appInfo.setPackageName(obj.getString("packageName"));
-            appInfo.setRunning(parseSet(obj.optString("importances")));
+            appInfo.setRunning(parseSet(obj.optString("importances:")));
             appInfo.setPids(parseList(obj.optString("pids")));
             return appInfo;
         } catch (JSONException e) {

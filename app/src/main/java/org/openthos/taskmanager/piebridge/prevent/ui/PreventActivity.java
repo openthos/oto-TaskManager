@@ -478,7 +478,6 @@ public class PreventActivity extends FragmentActivity implements
         PreventFragment fragment = (PreventFragment) getSupportFragmentManager().findFragmentByTag(tag);
         if (fragment != null) {
             fragment.saveListPosition();
-            fragment.refresh(force);
             if (position == currentItem) {
 //                fragment.startTaskIfNeeded();
             }
