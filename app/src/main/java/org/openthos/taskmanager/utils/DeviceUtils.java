@@ -132,7 +132,7 @@ public class DeviceUtils {
                     "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq");
             BufferedReader br = new BufferedReader(fr);
             String text = br.readLine();
-            return Double.parseDouble(text.trim());
+            return Double.parseDouble(text.trim()) / 1000000.0;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

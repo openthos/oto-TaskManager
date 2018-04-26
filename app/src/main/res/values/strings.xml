@@ -130,4 +130,9 @@
 
     <!-- google play in-app billing -->
     <string name="play_verify_error">Fail to verify your purchase, please don\'t crack Google Play In-app Billing.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="forward_app">Forward app</string>
+    <string name="background_app">Background app</string>
 </resources>

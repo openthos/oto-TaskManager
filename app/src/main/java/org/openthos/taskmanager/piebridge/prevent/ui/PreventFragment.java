@@ -1,24 +1,25 @@
 package org.openthos.taskmanager.piebridge.prevent.ui;
 
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v4.app.ListFragment;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -26,65 +27,75 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-import java.text.Collator;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.openthos.taskmanager.BuildConfig;
+import org.openthos.taskmanager.BaseFragment;
 import org.openthos.taskmanager.R;
-import org.openthos.taskmanager.piebridge.prevent.common.GmsUtils;
+import org.openthos.taskmanager.adapter.AppAdapter;
+import org.openthos.taskmanager.adapter.AppLayoutAdapters;
+import org.openthos.taskmanager.app.Constants;
+import org.openthos.taskmanager.bean.AppInfo;
+import org.openthos.taskmanager.bean.AppLayoutInfo;
+import org.openthos.taskmanager.listener.OnCpuChangeListener;
+import org.openthos.taskmanager.listener.OnListClickListener;
+import org.openthos.taskmanager.listener.OnTaskCallBack;
 import org.openthos.taskmanager.piebridge.prevent.common.PackageUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.LabelLoader;
-import org.openthos.taskmanager.piebridge.prevent.ui.util.LicenseUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.StatusUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.UILog;
+import org.openthos.taskmanager.task.RetrieveInfoTask;
+import org.openthos.taskmanager.utils.DeviceUtils;
+import org.openthos.taskmanager.utils.NonDormantAppUtils;
 
-public abstract class PreventFragment extends ListFragment implements AbsListView.OnScrollListener {
+public class PreventFragment extends BaseFragment implements OnListClickListener, View.OnClickListener {
 
-    private Adapter mAdapter;
+    private AppLayoutAdapters mAdapter;
     private PreventActivity mActivity;
     private Set<String> prevNames = null;
-    private View filter;
-    private CheckBox check;
-    private EditText search;
     private int headerIconWidth;
     private static final int HEADER_ICON_WIDTH = 48;
     private static Map<String, Position> positions = new HashMap<String, Position>();
+    private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(3);
 
     private boolean scrolling;
     private static boolean appNotification;
+    private ImageView mRefresh;
+    private ImageView mClean;
+    private TextView mCpuFrequence;
+    private TextView mCpuUse;
+    private TextView mBattertState;
+    private TextView mBatteryCharge;
+    private ListView mListView;
+    private Handler mHandler;
+    private BatteryChangeReceiver mBatteryChangeReceiver;
+    private double mCpuMaxFreqGHz;
+    private RefreshRunnable mRefreshRunnable;
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        registerForContextMenu(getListView());
-        mActivity = (PreventActivity) getActivity();
-        if (mActivity != null) {
-            appNotification = PreferenceManager.getDefaultSharedPreferences(mActivity).
-                    getBoolean("app_notification", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
-            setNewAdapterIfNeeded(mActivity, true);
-        }
+    private List<AppLayoutInfo> mDatas;
+    private List<AppInfo> mForwardDatas;
+    private List<AppInfo> mNonNeedDormants;
+    private List<AppInfo> mBackgroundDatas;
+    private Map<String, AppInfo> mAllDatasMap;
+    private double mTotalCpuUsed;
+
+    public PreventFragment() {
     }
 
     @Override
@@ -92,80 +103,161 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
         saveListPosition();
         super.onDestroyView();
         mActivity = null;
-        setListAdapter(null);
-    }
-
-    private void selectAll(boolean checked) {
-        if (mActivity != null && mAdapter != null) {
-            Set<String> selections = mActivity.getSelection();
-            if (checked) {
-                selections.addAll(mAdapter.getAllPreventablePackages());
-            } else {
-                selections.clear();
-            }
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    public void setChecked(boolean checked) {
-        if (check != null) {
-            check.setChecked(checked);
-        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.prevent_list, container, false);
-        filter = view.findViewById(R.id.filter);
-        check = (CheckBox) filter.findViewById(R.id.filter_check);
-        check.setOnClickListener(new View.OnClickListener() {
+    public int getLayoutId() {
+        return R.layout.prevent_list;
+    }
+
+    @Override
+    public void initView(View view) {
+        mRefresh = (ImageView) view.findViewById(R.id.refresh);
+        mClean = (ImageView) view.findViewById(R.id.clean);
+        mCpuFrequence = (TextView) view.findViewById(R.id.cpu_frquence);
+        mCpuUse = (TextView) view.findViewById(R.id.cpu_use);
+        mBattertState = (TextView) view.findViewById(R.id.battery_state);
+        mBatteryCharge = (TextView) view.findViewById(R.id.battery_charge);
+        mListView = (ListView) view.findViewById(R.id.listview);
+    }
+
+    @Override
+    public void initData() {
+        mActivity = (PreventActivity) getActivity();
+        appNotification = PreferenceManager.getDefaultSharedPreferences(mActivity).
+                getBoolean("app_notification", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+        setNewAdapterIfNeeded(mActivity, true);
+        mListView.addHeaderView(
+                LayoutInflater.from(mActivity).inflate(R.layout.main_list_header, null, false));
+
+        mHandler = new Handler();
+        mRefreshRunnable = new RefreshRunnable();
+        registBatteryReceiver();
+        mCpuMaxFreqGHz = DeviceUtils.getCurCpuFreq();
+        mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
+        mCpuUse.setText(getString(R.string.cpu_use, 0.0));
+        mDatas = new ArrayList<>();
+        mForwardDatas = new ArrayList<>();
+        mBackgroundDatas = new ArrayList<>();
+        mNonNeedDormants = new ArrayList<>();
+        mAllDatasMap = new HashMap<>();
+        initAllDatas();
+        initCpuInfo();
+    }
+
+    @Override
+    public void initListener() {
+        mRefresh.setOnClickListener(this);
+        mClean.setOnClickListener(this);
+
+        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onClick(View v) {
-                selectAll(check.isChecked());
-            }
-        });
-        search = (EditText) filter.findViewById(R.id.filter_query);
-        search.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int before, int after) {
-                // do nothing
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                scrolling = scrollState != SCROLL_STATE_IDLE;
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int after) {
-                if (mAdapter != null) {
-                    mAdapter.getFilter().filter(s);
+            public void onScroll(AbsListView view,
+                                 int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+            }
+        });
+    }
+
+    private void initAllDatas() {
+        new RetrieveInfoTask(mActivity, getPreventPkgNames(mActivity), new OnTaskCallBack() {
+            @Override
+            public void callBack(List<AppInfo> appInfos) {
+                mAllDatasMap.clear();
+                for (AppInfo appInfo : appInfos) {
+                    mAllDatasMap.put(appInfo.getPackageName(), appInfo);
+                    initNoDormantState();
+                    initPreventState();
+                    loadData();
                 }
             }
+        }).execute();
+    }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                // do nothing
+    private void initAllDataState() {
+        Map<String, Set<Long>> running = mActivity.getRunningProcesses();
+        for (String packageName : mAllDatasMap.keySet()) {
+            AppInfo appInfo = mAllDatasMap.get(packageName);
+            if (running != null && running.containsKey(packageName)) {
+                appInfo.setRunning(running.get(packageName));
+            } else {
+                appInfo.setRunning(null);
             }
-        });
-        //search.setHint(getQueryHint());
-        return view;
+        }
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        getListView().setOnScrollListener(this);
+    private void initNoDormantState() {
+        Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(mActivity).getAllAddedApp();
+        for (String packageName : mAllDatasMap.keySet()) {
+            AppInfo appInfo = mAllDatasMap.get(packageName);
+            if (nonDormantMaps != null && nonDormantMaps.containsKey(appInfo.getPackageName())) {
+                appInfo.setNonDormant(true);
+            } else {
+                appInfo.setNonDormant(false);
+            }
+        }
     }
 
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        scrolling = scrollState != SCROLL_STATE_IDLE;
+    private void initPreventState() {
+        Map<String, Boolean> preventPackages = mActivity.getPreventPackages();
+        for (String packageName : mAllDatasMap.keySet()) {
+            AppInfo appInfo = mAllDatasMap.get(packageName);
+            if (preventPackages != null && preventPackages.containsKey(appInfo.getPackageName())) {
+                appInfo.setAutoPrevent(preventPackages.get(packageName));
+            } else {
+                appInfo.setAutoPrevent(false);
+            }
+        }
     }
 
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+    public void loadData() {
+        mDatas.clear();
+        mForwardDatas.clear();
+        mNonNeedDormants.clear();
+        mBackgroundDatas.clear();
 
+        initAllDataState();
+        for (String packageName : mAllDatasMap.keySet()) {
+            AppInfo appInfo = mAllDatasMap.get(packageName);
+            switch (appInfo.getRunState(mActivity)) {
+                case Constants.FORWARD_APP:
+                    mForwardDatas.add(appInfo);
+                    break;
+                case Constants.BACKGROUND_APP:
+                    mBackgroundDatas.add(appInfo);
+                    break;
+                case Constants.NO_DORMANT_APP:
+                    mNonNeedDormants.add(appInfo);
+                    break;
+                case Constants.NOT_RUN:
+                    mBackgroundDatas.add(appInfo);
+                    break;
+            }
+        }
+
+        if (mForwardDatas.size() != 0) {
+            mDatas.add(new AppLayoutInfo(getString(R.string.forward_app), mForwardDatas));
+        }
+        if (mNonNeedDormants.size() != 0) {
+            mDatas.add(new AppLayoutInfo(getString(R.string.non_dormant), mNonNeedDormants));
+        }
+        if (mBackgroundDatas.size() != 0) {
+            mDatas.add(new AppLayoutInfo(getString(R.string.background_app), mBackgroundDatas));
+        }
+        mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
+        mAdapter.refreshList();
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        l.showContextMenuForChild(v);
+    private void registBatteryReceiver() {
+        mBatteryChangeReceiver = new BatteryChangeReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        mActivity.registerReceiver(mBatteryChangeReceiver, filter);
     }
 
     @Override
@@ -174,9 +266,20 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
         super.onPause();
     }
 
+    @Override
+    public void onDestroy() {
+        if (mBatteryChangeReceiver != null) {
+            mActivity.unregisterReceiver(mBatteryChangeReceiver);
+            mBatteryChangeReceiver = null;
+        }
+        super.onDestroy();
+    }
+
     private int getHeaderIconWidth() {
         if (headerIconWidth == 0) {
-            headerIconWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, HEADER_ICON_WIDTH, getResources().getDisplayMetrics());
+            headerIconWidth = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, HEADER_ICON_WIDTH,
+                    getResources().getDisplayMetrics());
         }
         return headerIconWidth;
     }
@@ -190,35 +293,29 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
         if (!canCreateContextMenu(menu, menuInfo)) {
             return;
         }
-        menu.clear();
-        ViewHolder holder = (ViewHolder) ((AdapterContextMenuInfo) menuInfo).targetView.getTag();
-        menu.setHeaderTitle(holder.nameView.getText());
-        if (holder.icon != null) {
-            setHeaderIcon(menu, holder.icon);
-        }
-        menu.add(Menu.NONE, R.string.app_info, Menu.NONE, R.string.app_info);
-        if (/*holder.checkView.isEnabled() || */canPreventAll()) {
-            updatePreventMenu(menu, holder.packageName);
-        }
-        if (getMainIntent(holder.packageName) != null) {
-            menu.add(Menu.NONE, R.string.open, Menu.NONE, R.string.open);
-        }
-        if (holder.canUninstall) {
-            menu.add(Menu.NONE, R.string.uninstall, Menu.NONE, R.string.uninstall);
-        }
-        if (appNotification) {
-            menu.add(Menu.NONE, R.string.app_notifications, Menu.NONE, R.string.app_notifications);
-        }
+//        menu.clear();
+//        AppAdapter.ViewHolder holder = (AppAdapter.ViewHolder) ((AdapterContextMenuInfo) menuInfo).targetView.getTag();
+//        menu.setHeaderTitle(holder.nameView.getText());
+//        if (holder.icon != null) {
+//            setHeaderIcon(menu, holder.icon);
+//        }
+//        menu.add(Menu.NONE, R.string.app_info, Menu.NONE, R.string.app_info);
+//        if (canPreventAll()) {
+//            updatePreventMenu(menu, holder.packageName);
+//        }
+//        if (getMainIntent(holder.packageName) != null) {
+//            menu.add(Menu.NONE, R.string.open, Menu.NONE, R.string.open);
+//        }
+//        if (holder.canUninstall) {
+//            menu.add(Menu.NONE, R.string.uninstall, Menu.NONE, R.string.uninstall);
+//        }
+//        if (appNotification) {
+//            menu.add(Menu.NONE, R.string.app_notifications, Menu.NONE, R.string.app_notifications);
+//        }
     }
 
     private boolean canPreventAll() {
         return true;
-//        if (BuildConfig.DONATE) {
-//            String licenseName = LicenseUtils.getRawLicenseName(mActivity);
-//            return licenseName != null && licenseName.startsWith("PA");
-//        } else {
-//            return true;
-//        }
     }
 
     private void updatePreventMenu(Menu menu, String packageName) {
@@ -241,14 +338,15 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        if (mActivity == null || item == null) {
-            return false;
-        }
-        ViewHolder holder = (ViewHolder) ((AdapterContextMenuInfo) item.getMenuInfo()).targetView.getTag();
-        return onContextItemSelected(holder, holder.packageName, item.getItemId());
+//        if (mActivity == null || item == null) {
+//            return false;
+//        }
+//        AppAdapter.ViewHolder holder = (AppAdapter.ViewHolder) ((AdapterContextMenuInfo) item.getMenuInfo()).targetView.getTag();
+//        return onContextItemSelected(holder, holder.packageName, item.getItemId());
+        return false;
     }
 
-    private boolean onContextItemSelected(ViewHolder holder, String packageName, int id) {
+    private boolean onContextItemSelected(AppAdapter.ViewHolder holder, String packageName, int id) {
         switch (id) {
             case R.string.app_info:
                 startActivity(id, packageName);
@@ -260,11 +358,11 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
                 startNotification(packageName);
                 break;
             case R.string.remove:
-                Toast.makeText(getContext(), "item remove" + packageName, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "item remove" + packageName, Toast.LENGTH_SHORT).show();
                 updatePrevent(id, holder, packageName);
                 break;
             case R.string.prevent:
-                Toast.makeText(getContext(), "item prevent" + packageName, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "item prevent" + packageName, Toast.LENGTH_SHORT).show();
                 updatePrevent(id, holder, packageName);
                 break;
             case R.string.open:
@@ -274,7 +372,7 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
         return true;
     }
 
-    private boolean updatePrevent(int id, ViewHolder holder, String packageName) {
+    private boolean updatePrevent(int id, AppAdapter.ViewHolder holder, String packageName) {
         switch (id) {
             case R.string.prevent:
                 holder.preventView.setVisibility(View.VISIBLE);
@@ -341,29 +439,13 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
     public void refresh(boolean force) {
         if (mActivity != null) {
             setNewAdapterIfNeeded(mActivity, force);
-            if (mActivity.getSelection().isEmpty()) {
-                check.setChecked(false);
-            }
         }
-    }
-
-    protected abstract Set<String> getPreventPkgNames(PreventActivity activity);
-
-/*  protected abstract int getQueryHint();
-
-    protected abstract String getDefaultQuery();
-
-    protected abstract boolean canSelectAll();*/
-
-    protected boolean showRunning() {
-        return false;
     }
 
     public void saveListPosition() {
         if (mAdapter != null) {
-            ListView l = getListView();
-            int position = l.getFirstVisiblePosition();
-            View v = l.getChildAt(0);
+            int position = mListView.getFirstVisiblePosition();
+            View v = mListView.getChildAt(0);
             int top = (v == null) ? 0 : v.getTop();
             setListPosition(new Position(position, top));
         }
@@ -385,11 +467,9 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
             names = prevNames;
         }
         if (force || mAdapter == null || !names.equals(prevNames)) {
-            if (mAdapter != null) {
-                setListAdapter(null);
-            }
-            mAdapter = new Adapter(activity, names, filter, showRunning());
-            setListAdapter(mAdapter);
+            mAdapter = new AppLayoutAdapters(activity, mDatas);
+            mListView.setAdapter(mAdapter);
+            mAdapter.setOnListClickListener(this);
             if (prevNames == null) {
                 prevNames = new HashSet<>();
             }
@@ -399,40 +479,106 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
             mAdapter.notifyDataSetChanged();
             Position position = getListPosition();
             if (position != null) {
-                getListView().setSelectionFromTop(position.pos, position.top);
+                mListView.setSelectionFromTop(position.pos, position.top);
             }
         }
-    }
-
-    public void startTaskIfNeeded() {
-        mAdapter.startTaskIfNeeded();
     }
 
     public void updateTimeIfNeeded(String packageName) {
-        if (scrolling || mAdapter == null) {
-            return;
-        }
-        ListView l = getListView();
-        int size = mAdapter.getCount();
-        for (int i = 0; i < size; ++i) {
-            View view = l.getChildAt(i);
-            if (view == null || view.getTag() == null || view.getVisibility() != View.VISIBLE) {
-                continue;
+//        if (scrolling || mAdapter == null) {
+//            return;
+//        }
+//        int size = mAdapter.getCount();
+//        for (int i = 0; i < size; ++i) {
+//            View view = mListView.getChildAt(i);
+//            if (view == null || view.getTag() == null || view.getVisibility() != View.VISIBLE) {
+//                continue;
+//            }
+//            AppAdapter.ViewHolder holder = (AppAdapter.ViewHolder) view.getTag();
+//            if (PackageUtils.equals(packageName, holder.packageName)) {
+//                holder.updatePreventView(mActivity);
+//                holder.running = mActivity.getRunningProcesses().get(packageName);
+//                holder.summaryView.setText(StatusUtils.formatRunning(mActivity, holder.running));
+//            } else if (holder.running != null) {
+//                holder.summaryView.setText(StatusUtils.formatRunning(mActivity, holder.running));
+//            }
+//        }
+    }
+
+    protected Set<String> getPreventPkgNames(PreventActivity activity) {
+        Set<String> names = new HashSet<>();
+        PackageManager pm = activity.getPackageManager();
+        for (PackageInfo pkgInfo : pm.getInstalledPackages(0)) {
+            ApplicationInfo appInfo = pkgInfo.applicationInfo;
+            if (PackageUtils.canPrevent(pm, appInfo)) {
+                names.add(appInfo.packageName);
             }
-            ViewHolder holder = (ViewHolder) view.getTag();
-            if (PackageUtils.equals(packageName, holder.packageName)) {
-                holder.updatePreventView(mActivity);
-                holder.running = mActivity.getRunningProcesses().get(packageName);
-                holder.summaryView.setText(StatusUtils.formatRunning(mActivity, holder.running));
-            } else if (holder.running != null) {
-                holder.summaryView.setText(StatusUtils.formatRunning(mActivity, holder.running));
+        }
+        return names;
+    }
+
+    public void notifyDataSetChanged() {
+        loadData();
+    }
+
+    @Override
+    public void onListClickListener(View view, String packageName) {
+        AppInfo appInfo = mAllDatasMap.get(packageName);
+        switch (view.getId()) {
+            case R.id.layout:
+                Log.i("ljh", "layout");
+                mListView.showContextMenuForChild(view);
+                break;
+            case R.id.dormant:
+                forceStopAPK(packageName);
+                mActivity.retrieveRunning();
+                break;
+            case R.id.add_or_remove:
+                if (appInfo != null) {
+                    addNonDormantList(appInfo.getPackageName(), !appInfo.isNonDormant());
+                }
+                loadData();
+                break;
+            case R.id.prevent:
+                if (appInfo != null) {
+                    appInfo.setAutoPrevent(!appInfo.isAutoPrevent());
+                    mActivity.changePrevent(packageName, appInfo.isAutoPrevent());
+                }
+                break;
+        }
+    }
+
+    /**
+     * Store the package name as packageName or remove the saved SP
+     *
+     * @param packageName
+     * @param isAdd
+     */
+    public void addNonDormantList(String packageName, boolean isAdd) {
+        AppInfo appInfo = mAllDatasMap.get(packageName);
+        if (appInfo != null) {
+            if (isAdd) {
+                NonDormantAppUtils.getInstance(getActivity()).saveAddedApp(packageName, appInfo.getAppName());
+                appInfo.setNonDormant(true);
+            } else {
+                NonDormantAppUtils.getInstance(getActivity()).removeAddApp(packageName);
+                appInfo.setNonDormant(false);
             }
         }
     }
 
-    public void notifyDataSetChanged() {
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.refresh:
+                mActivity.retrieveRunning();
+//                loadData();
+                break;
+            case R.id.clean:
+                Log.i("ljh", "clean");
+                Set<String> preventPkgNames = getPreventPkgNames(mActivity);
+                Log.i("ljh", "size " + preventPkgNames.size());
+                break;
         }
     }
 
@@ -446,375 +592,95 @@ public abstract class PreventFragment extends ListFragment implements AbsListVie
         }
     }
 
-    private static class AppInfo implements Comparable<AppInfo> {
-        int flags;
-        String name = "";
-        String packageName;
-        Set<Long> running;
-
-        public AppInfo(String packageName, String name, Set<Long> running) {
-            super();
-            this.packageName = packageName;
-            if (name != null) {
-                this.name = name;
-            }
-            this.running = running;
-        }
-
-        public AppInfo setFlags(int flags) {
-            this.flags = flags;
-            return this;
-        }
-
-        public boolean isSystem() {
-            return PackageUtils.isSystemPackage(this.flags);
-        }
-
+    private class BatteryChangeReceiver extends BroadcastReceiver {
         @Override
-        public String toString() {
-            return (running == null ? "1" : "0") + (isSystem() ? "1" : "0") + "/" + name + "/" + packageName;
-        }
-
-        @Override
-        public int compareTo(AppInfo another) {
-            return Collator.getInstance().compare(toString(), another.toString());
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof AppInfo && compareTo((AppInfo) obj) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return toString().hashCode();
-        }
-    }
-
-    private static class ViewHolder {
-        String packageName;
-        ImageView iconView;
-        TextView nameView;
-        TextView summaryView;
-        TextView loadingView;
-        ImageView preventView;
-        Drawable icon;
-        Set<Long> running;
-        RetrieveIconTask task;
-        boolean canUninstall;
-
-        public void updatePreventView(PreventActivity activity) {
-            Boolean result = activity.getPreventPackages().get(packageName);
-            if (result == null) {
-                preventView.setVisibility(View.INVISIBLE);
-            } else {
-                preventView.setVisibility(View.VISIBLE);
-                running = activity.getRunningProcesses().get(packageName);
-                preventView.setImageResource(StatusUtils.getDrawable(running, result));
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+            int level = extras.getInt(BatteryManager.EXTRA_LEVEL, 0);
+            int status = extras.getInt(BatteryManager.EXTRA_STATUS);
+            mBatteryCharge.setVisibility(View.VISIBLE);
+            switch (status) {
+                case BatteryManager.BATTERY_STATUS_CHARGING:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.charging)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                case BatteryManager.BATTERY_STATUS_DISCHARGING:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.discharging)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                case BatteryManager.BATTERY_STATUS_FULL:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.battery_full)));
+                    mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    break;
+                default:
+                    mBattertState.setText(
+                            getString(R.string.battery_state, getString(R.string.battery_none)));
+                    mBatteryCharge.setVisibility(View.GONE);
+                    break;
             }
         }
     }
 
-    private class Adapter extends ArrayAdapter<AppInfo> {
-        private final PackageManager mPm;
-        private final LayoutInflater inflater;
-        private final PreventActivity mActivity;
-        //private final CompoundButton.OnCheckedChangeListener mListener;
-
-        private List<AppInfo> mAppInfos = new ArrayList<AppInfo>();
-        private Set<String> mNames = new HashSet<String>();
-        private Set<String> mCanPreventNames = new HashSet<String>();
-        private Set<String> mFiltered;
-        private Filter mFilter;
-        private View mView;
-        private RetrieveInfoTask mTask;
-
-        public Adapter(PreventActivity activity) {
-            super(activity, R.layout.prevent_item);
-            mActivity = activity;
-            mPm = mActivity.getPackageManager();
-            inflater = LayoutInflater.from(activity);
-        }
-
-        public Adapter(final PreventActivity activity, Set<String> names, View view, boolean showRunning) {
-            this(activity);
-            mView = view;
-            mNames.addAll(names);
-            mTask = new RetrieveInfoTask();
-            mCanPreventNames.addAll(names);
-            if (showRunning) {
-                mNames.addAll(mActivity.getRunningProcesses().keySet());
-            }
-        }
+    private class RefreshRunnable implements Runnable {
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view = convertView;
-            if (view == null) {
-                view = inflater.inflate(R.layout.prevent_item, parent, false);
-                ViewHolder viewHolder = new ViewHolder();
-                viewHolder.iconView = (ImageView) view.findViewById(R.id.icon);
-                viewHolder.nameView = (TextView) view.findViewById(R.id.name);
-                viewHolder.summaryView = (TextView) view.findViewById(R.id.summary);
-                viewHolder.loadingView = (TextView) view.findViewById(R.id.loading);
-                viewHolder.preventView = (ImageView) view.findViewById(R.id.item_prevent);
-                view.setTag(viewHolder);
-            }
-
-            ViewHolder holder = (ViewHolder) view.getTag();
-            AppInfo appInfo = getItem(position);
-            holder.nameView.setText(appInfo.name);
-            if (!PackageUtils.equals(holder.packageName, appInfo.packageName)) {
-                holder.summaryView.setVisibility(View.GONE);
-                holder.iconView.setImageDrawable(mPm.getDefaultActivityIcon());
-                holder.loadingView.setVisibility(View.VISIBLE);
-            }
-            holder.packageName = appInfo.packageName;
-            if (appInfo.isSystem()) {
-                view.setBackgroundColor(mActivity.getDangerousColor());
-            } else {
-                view.setBackgroundColor(mActivity.getTransparentColor());
-            }
-            holder.canUninstall = ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) || ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
-            holder.updatePreventView(mActivity);
-            if (holder.task != null) {
-                holder.task.cancel(true);
-            }
-            holder.task = new RetrieveIconTask();
-            holder.task.execute(holder, appInfo);
-            return view;
+        public void run() {
+            initCpuInfo();
         }
+    }
 
-
-        public Filter getFilter() {
-            if (mFilter == null) {
-                mFilter = new SimpleFilter();
+    /**
+     * init cpu info
+     */
+    private void initCpuInfo() {
+        Process process;
+        BufferedReader reader;
+        try {
+            process = Runtime.getRuntime().exec("/system/bin/top -n 1");
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            boolean isIgnore = true;
+            for (String packageName : mAllDatasMap.keySet()) {
+                mAllDatasMap.get(packageName).clearCpuUsage();
             }
-            return mFilter;
-        }
-
-        public Collection<String> getAllPreventablePackages() {
-            Set<String> allPreventablePackages = new HashSet<String>();
-            if (mFiltered == null) {
-                allPreventablePackages.addAll(mNames);
-            } else {
-                allPreventablePackages.addAll(mFiltered);
-            }
-            /*if (canSelectAll()) {
-                return allPreventablePackages;
-            }*/
-            Iterator<String> iterator = allPreventablePackages.iterator();
-            while (iterator.hasNext()) {
-                String name = iterator.next();
-                if (!mCanPreventNames.contains(name) || PackageUtils.isImportPackage(mActivity, name)) {
-                    iterator.remove();
-                }
-            }
-            return allPreventablePackages;
-        }
-
-        public void startTaskIfNeeded() {
-            AsyncTask.Status status = mTask.getStatus();
-            if (status == AsyncTask.Status.PENDING) {
-                mTask.execute();
-            } else if (mTask.dialog != null) {
-                mTask.dialog.show();
-            }
-        }
-
-        private class SimpleFilter extends Filter {
-            @Override
-            protected FilterResults performFiltering(CharSequence prefix) {
-                FilterResults results = new FilterResults();
-                String query;
-                boolean defaultQuery = false;
-                /*if (TextUtils.isEmpty(prefix)) {
-                    query = getDefaultQuery();
-                    defaultQuery = true;
-                } else {*/
-                query = prefix.toString().toLowerCase(Locale.US);
-                //}
-                if (mFiltered == null) {
-                    mFiltered = new HashSet<String>();
-                }
-                List<AppInfo> values = new ArrayList<AppInfo>();
-                if (query == null) {
-                    values.addAll(mAppInfos);
-                    mFiltered.addAll(mNames);
-                } else {
-                    mFiltered.clear();
-                    for (AppInfo appInfo : mAppInfos) {
-                        if (defaultQuery && !mCanPreventNames.contains(appInfo.packageName)) {
-                            continue;
-                        }
-                        if (match(query, appInfo)) {
-                            values.add(appInfo);
-                            mFiltered.add(appInfo.packageName);
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.contains("User") && line.contains("System")) {
+                    isIgnore = true;
+                    String replace = line.replace("User", "").replace("System", "")
+                            .replace("IOW", "").replace("IRQ", "").replace("%", "").replace(" ", "");
+                    String[] split = replace.split(",");
+                    mTotalCpuUsed = 0.0;
+                    for (String s : split) {
+                        mTotalCpuUsed += Integer.parseInt(s);
+                    }
+                } else if (line.contains("PID")) {
+                    isIgnore = false;
+                } else if (!isIgnore) {
+                    String[] split = line.replace("%", "").split(Constants.ONE_OR_MORE_SPACE);
+                    double cpuUsed = Double.parseDouble(split[2]);
+                    if (split.length == 10 && cpuUsed > 0) {
+                        if (cpuUsed > 0) {
+                            if (mAllDatasMap.get(split[9]) != null) {
+                                mAllDatasMap.get(split[9]).addCpuUsage(cpuUsed);
+                            }
+                        } else {
+                            break;
                         }
                     }
                 }
-                results.values = values;
-                results.count = values.size();
-                return results;
             }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                setNotifyOnChange(false);
-                clear();
-                for (AppInfo appInfo : (List<AppInfo>) results.values) {
-                    add(appInfo);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mFixedThreadPool.execute(mRefreshRunnable);
                 }
-                notifyDataSetChanged();
-            }
-
-            private boolean match(String query, AppInfo appInfo) {
-                return contains(query, appInfo)
-                        || queryForThirdParty(query, appInfo)
-                        || queryExtra(query, appInfo)
-                        || queryCombined(query, appInfo);
-            }
-
-            private boolean queryCombined(String query, AppInfo appInfo) {
-                if ("-sg".equals(query)) {
-                    return appInfo.isSystem() && !GmsUtils.isGapps(appInfo.packageName);
-                } else if ("-3g".equals(query)) {
-                    return !appInfo.isSystem() || GmsUtils.isGapps(appInfo.packageName);
-                }
-                return false;
-            }
-
-            private boolean queryExtra(String query, AppInfo appInfo) {
-                return queryForSystem(query, appInfo)
-                        || queryForGapps(query, appInfo)
-                        || queryForRunning(query, appInfo)
-                        || queryForEnabled(query, appInfo);
-            }
-
-            private boolean contains(String query, AppInfo appInfo) {
-                return "-a".equals(query)
-                        || appInfo.name.toLowerCase(Locale.US).contains(query)
-                        || (query.length() >= 0x4 && appInfo.packageName.toLowerCase(Locale.US).contains(query));
-            }
-
-            private boolean queryForThirdParty(String query, AppInfo appInfo) {
-                return "-3".equals(query) && !appInfo.isSystem();
-            }
-
-            private boolean queryForSystem(String query, AppInfo appInfo) {
-                return "-s".equals(query) && appInfo.isSystem();
-            }
-
-            private boolean queryForGapps(String query, AppInfo appInfo) {
-                return "-g".equals(query) && GmsUtils.isGapps(appInfo.packageName);
-            }
-
-            private boolean queryForRunning(String query, AppInfo appInfo) {
-                return "-r".equals(query) && mActivity.getRunningProcesses().containsKey(appInfo.packageName);
-            }
-
-            private boolean queryForEnabled(String query, AppInfo appInfo) {
-                return "-e".equals(query) && !mActivity.getPreventPackages().containsKey(appInfo.packageName);
-            }
-        }
-
-        private class RetrieveInfoTask extends AsyncTask<Void, Integer, Set<AppInfo>> {
-            ProgressDialog dialog;
-            LabelLoader labelLoader;
-
-            @Override
-            protected void onPreExecute() {
-                dialog = new ProgressDialog(mActivity);
-                dialog.setTitle(R.string.app_name);
-                dialog.setIcon(R.mipmap.ic_launcher);
-                dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                dialog.setCancelable(false);
-                dialog.setMax(mNames.size());
-                dialog.show();
-                labelLoader = new LabelLoader(mActivity);
-            }
-
-            @Override
-            protected Set<AppInfo> doInBackground(Void... params) {
-                Map<String, Set<Long>> running = mActivity.getRunningProcesses();
-                Set<AppInfo> applications = new TreeSet<AppInfo>();
-                int i = 1;
-                for (String name : mNames) {
-                    publishProgress(++i);
-                    ApplicationInfo info;
-                    try {
-                        info = mPm.getApplicationInfo(name, 0);
-                    } catch (NameNotFoundException e) { // NOSONAR
-                        info = null;
-                    }
-                    if (info == null || !info.enabled) {
-                        continue;
-                    }
-                    String label = labelLoader.loadLabel(info);
-                    applications.add(new AppInfo(name, label, running.get(name)).setFlags(info.flags));
-                }
-                return applications;
-            }
-
-            @Override
-            protected void onProgressUpdate(Integer... progress) {
-                if (dialog != null) {
-                    dialog.setProgress(progress[0]);
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Set<AppInfo> applications) {
-                for (AppInfo application : applications) {
-                    add(application);
-                    mAppInfos.add(application);
-                }
-                if (dialog != null) {
-                    dialog.dismiss();
-                    dialog = null;
-                }
-                if (mView != null) {
-                    mView.setVisibility(View.VISIBLE);
-                }
-                String query = search.getText().toString();
-                /*if (TextUtils.isEmpty(query)) {
-                    query = getDefaultQuery();
-                }*/
-                if (!TextUtils.isEmpty(query)) {
-                    getFilter().filter(query);
-                }
-            }
-        }
-    }
-
-    private class RetrieveIconTask extends AsyncTask<Object, Void, ViewHolder> {
-
-        WeakReference<PreventActivity> wr = new WeakReference<>(mActivity);
-
-        @Override
-        protected ViewHolder doInBackground(Object... params) {
-            ViewHolder holder = (ViewHolder) params[0];
-            PreventActivity pa = wr.get();
-            if (pa == null) {
-                return holder;
-            }
-            AppInfo appInfo = (AppInfo) params[1];
-            try {
-                holder.icon = pa.getPackageManager().getApplicationIcon(appInfo.packageName);
-            } catch (NameNotFoundException e) { // NOSONAR
-                // do nothing
-            }
-            holder.running = pa.getRunningProcesses().get(appInfo.packageName);
-            return holder;
-        }
-
-        @Override
-        protected void onPostExecute(ViewHolder holder) {
-            holder.iconView.setImageDrawable(holder.icon);
-            holder.summaryView.setText(StatusUtils.formatRunning(mActivity, holder.running));
-            holder.loadingView.setVisibility(View.GONE);
-            holder.summaryView.setVisibility(View.VISIBLE);
+            }, Constants.DELAY_TIME_REFRESH);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

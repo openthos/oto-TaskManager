@@ -110,7 +110,8 @@ public class PreventActivity extends FragmentActivity implements
         /**
          * 所有程序 / 阻止列表
          * */
-        mPageTitles = new String[]{getString(R.string.applications), getString(R.string.prevent_list)};
+//        mPageTitles = new String[]{getString(R.string.applications), getString(R.string.prevent_list)};
+        mPageTitles = new String[]{getString(R.string.applications)};
         mPageSelections = new ArrayList<Set<String>>();
         mPageSelections.add(new HashSet<String>());
         mPageSelections.add(new HashSet<String>());
@@ -174,7 +175,7 @@ public class PreventActivity extends FragmentActivity implements
         });
     }
 
-    private void retrievePrevents() {
+    public void retrievePrevents() {
         PackageUtils.clearInputMethodPackages();
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -186,7 +187,7 @@ public class PreventActivity extends FragmentActivity implements
                 0, null, null);
     }
 
-    private void retrieveRunning() {
+    public void retrieveRunning() {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         intent.setAction(PreventIntent.ACTION_GET_PROCESSES);//正在运行
@@ -363,6 +364,7 @@ public class PreventActivity extends FragmentActivity implements
                 }
                 running.clear();
                 running.putAll(processes);
+                Log.i("ljh","running " + running.size());
                 notifyDataSetChanged();
             } catch (JSONException e) {
                 UILog.e("cannot convert to json", e);
@@ -381,6 +383,7 @@ public class PreventActivity extends FragmentActivity implements
                     String key = it.next();
                     prevents.put(key, json.optBoolean(key));
                 }
+                Log.i("ljh","prevent "+prevents.size());
                 /**
                  * json 串
                  * result{"com.microsoft.office.excel":true,"com.microsoft.office.powerpoint":true}
@@ -477,7 +480,7 @@ public class PreventActivity extends FragmentActivity implements
             fragment.saveListPosition();
             fragment.refresh(force);
             if (position == currentItem) {
-                fragment.startTaskIfNeeded();
+//                fragment.startTaskIfNeeded();
             }
             return true;
         } else {
@@ -544,10 +547,7 @@ public class PreventActivity extends FragmentActivity implements
             Fragment fragment;
             switch (position) {
                 case APPLICATIONS:
-                    fragment = new Applications();
-                    break;
-                case PREVENT_LIST:
-                    fragment = new PreventList();
+                    fragment = new PreventFragment();
                     break;
                 default:
                     return null;
@@ -579,10 +579,11 @@ public class PreventActivity extends FragmentActivity implements
             public void run() {
                 if (!paused) {
                     updateTimeIfNeeded(null);
-                    mainHandler.postDelayed(this, 0x3e8);
+                    retrieveRunning();
+                    mainHandler.postDelayed(this, 1000);
                 }
             }
-        }, 0x3e8);
+        }, 1000);
     }
 
     @Override

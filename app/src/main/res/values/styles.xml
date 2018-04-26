@@ -2,6 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Light.NoTitleBar">
+        <item name="color_dangerous">@color/color_dangerous_light</item>
     </style>
 
     <style name="TitleTextStyle">
