@@ -28,6 +28,11 @@
     <string name="discharging">discharging</string>
     <string name="battery_full">battery full</string>
     <string name="battery_none">battery none</string>
+    <string name="forward_app">Forward app</string>
+    <string name="background_app">Background app</string>
+    <string name="refresh">refresh</string>
+    <string name="stop_running_application">stop all running application</string>
+    <string name="add_non_dormant_list">Add non dormant list</string>
 
     <string name="soak_version">This is not a release version, and may block your device. If you don\'t like to be participate, please uninstall and restore to release version.</string>
 
@@ -132,7 +137,4 @@
     <string name="play_verify_error">Fail to verify your purchase, please don\'t crack Google Play In-app Billing.</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="forward_app">Forward app</string>
-    <string name="background_app">Background app</string>
 </resources>

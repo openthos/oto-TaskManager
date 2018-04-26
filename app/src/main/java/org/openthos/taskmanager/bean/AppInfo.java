@@ -209,16 +209,18 @@ public class AppInfo {
     }
 
     public int getRunState(Context context) {
-        String stateStr = StatusUtils.formatRunning(context, running).toString();
-        if (isNonDormant()) {
-            return Constants.NO_DORMANT_APP;
-        } else if (stateStr.contains(context.getResources().getString(R.string.importance_foreground))) {
-            return Constants.FORWARD_APP;
-        } else if (stateStr.contains(context.getResources().getString(R.string.not_running))) {
-            return Constants.NOT_RUN;
-        } else {
-            return Constants.BACKGROUND_APP;
+        if (runDescribe != null) {
+            if (isNonDormant()) {
+                return Constants.NO_DORMANT_APP;
+            } else if (runDescribe.contains(context.getResources().getString(R.string.importance_foreground))) {
+                return Constants.FORWARD_APP;
+            } else if (runDescribe.contains(context.getResources().getString(R.string.not_running))) {
+                return Constants.NOT_RUN;
+            } else {
+                return Constants.BACKGROUND_APP;
+            }
         }
+        return Constants.NOT_RUN;
     }
 
     public String toJason() {

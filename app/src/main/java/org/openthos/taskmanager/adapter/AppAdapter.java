@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,15 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.openthos.taskmanager.R;
-import org.openthos.taskmanager.app.Constants;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnListClickListener;
-import org.openthos.taskmanager.piebridge.prevent.common.PackageUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.PreventActivity;
-import org.openthos.taskmanager.piebridge.prevent.ui.util.StatusUtils;
-import org.openthos.taskmanager.utils.ToolUtils;
-
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +25,7 @@ public class AppAdapter extends BasicAdapter {
     private List<AppInfo> mDatas;
     private PreventActivity mActivity;
     private OnListClickListener mOnListClickListener;
+    private View.OnHoverListener mOnHoverListener;
     private final PackageManager mPm;
 
     public AppAdapter(Context context, List<AppInfo> datas) {
@@ -79,10 +72,6 @@ public class AppAdapter extends BasicAdapter {
         holder.addView.setImageResource(appInfo.isNonDormant()
                 ? R.mipmap.o_protect
                 : R.mipmap.add_black);
-        holder.dormantView.setTag(appInfo.getPackageName());
-        holder.addView.setTag(appInfo.getPackageName());
-        holder.prevent.setTag(appInfo.getPackageName());
-        holder.layout.setTag(appInfo.getPackageName());
 
         if (appInfo.isSystem()) {
             convertView.setBackgroundColor(mActivity.getDangerousColor());
@@ -98,6 +87,10 @@ public class AppAdapter extends BasicAdapter {
         }
         holder.summaryView.setText(appInfo.getRunDescribe());
 
+        holder.dormantView.setTag(appInfo);
+        holder.addView.setTag(appInfo);
+        holder.prevent.setTag(appInfo);
+        holder.layout.setTag(appInfo);
         return convertView;
     }
 
@@ -107,6 +100,10 @@ public class AppAdapter extends BasicAdapter {
 
     public void setOnListClickListener(OnListClickListener onListClickListener) {
         mOnListClickListener = onListClickListener;
+    }
+
+    public void setOnHoverListener(View.OnHoverListener onHoverListener) {
+        mOnHoverListener = onHoverListener;
     }
 
     @Override
@@ -167,25 +164,25 @@ public class AppAdapter extends BasicAdapter {
             addView.setOnClickListener(this);
             dormantView.setOnClickListener(this);
             prevent.setOnClickListener(this);
+
             layout.setOnHoverListener(this);
+            addView.setOnHoverListener(this);
+            dormantView.setOnHoverListener(this);
+            prevent.setOnHoverListener(this);
         }
 
         @Override
         public void onClick(View view) {
             if (mOnListClickListener != null) {
-                mOnListClickListener.onListClickListener(view, (String) view.getTag());
+                mOnListClickListener.onListClickListener(view,
+                        ((AppInfo) view.getTag()).getPackageName());
             }
         }
 
         @Override
         public boolean onHover(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_HOVER_ENTER:
-                    v.setBackgroundColor(mContext.getResources().getColor(R.color.theme));
-                    break;
-                case MotionEvent.ACTION_HOVER_EXIT:
-                    v.setBackgroundColor(mContext.getResources().getColor(R.color.transparent));
-                    break;
+            if (mOnHoverListener != null) {
+                mOnHoverListener.onHover(v, event);
             }
             return false;
         }

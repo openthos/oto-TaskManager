@@ -40,6 +40,7 @@ import org.openthos.taskmanager.piebridge.prevent.common.PreventIntent;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.PreventListUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.PreventUtils;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.UILog;
+import org.openthos.taskmanager.view.HoverTextView;
 
 public class PreventActivity extends FragmentActivity implements
         ViewPager.OnPageChangeListener, View.OnClickListener {

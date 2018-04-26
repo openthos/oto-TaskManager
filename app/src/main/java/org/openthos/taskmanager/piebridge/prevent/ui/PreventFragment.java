@@ -28,8 +28,10 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -66,8 +68,10 @@ import org.openthos.taskmanager.piebridge.prevent.ui.util.UILog;
 import org.openthos.taskmanager.task.RetrieveInfoTask;
 import org.openthos.taskmanager.utils.DeviceUtils;
 import org.openthos.taskmanager.utils.NonDormantAppUtils;
+import org.openthos.taskmanager.view.HoverTextView;
 
-public class PreventFragment extends BaseFragment implements OnListClickListener, View.OnClickListener {
+public class PreventFragment extends BaseFragment
+        implements OnListClickListener, View.OnClickListener, View.OnHoverListener {
 
     private AppLayoutAdapters mAdapter;
     private PreventActivity mActivity;
@@ -86,6 +90,9 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
     private TextView mBattertState;
     private TextView mBatteryCharge;
     private ListView mListView;
+    private HoverTextView mHoverText;
+    private FrameLayout mMainLayout;
+
     private Handler mHandler;
     private BatteryChangeReceiver mBatteryChangeReceiver;
     private double mCpuMaxFreqGHz;
@@ -116,6 +123,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
 
     @Override
     public void initView(View view) {
+        mMainLayout = (FrameLayout) view.findViewById(R.id.main_layout);
         mRefresh = (ImageView) view.findViewById(R.id.refresh);
         mClean = (ImageView) view.findViewById(R.id.clean);
         mCpuFrequence = (TextView) view.findViewById(R.id.cpu_frquence);
@@ -123,6 +131,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         mBattertState = (TextView) view.findViewById(R.id.battery_state);
         mBatteryCharge = (TextView) view.findViewById(R.id.battery_charge);
         mListView = (ListView) view.findViewById(R.id.listview);
+        mHoverText = (HoverTextView) view.findViewById(R.id.hove_text);
     }
 
     @Override
@@ -138,9 +147,9 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         appNotification = PreferenceManager.getDefaultSharedPreferences(mActivity).
                 getBoolean("app_notification", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
+        mHoverText.setParentView(mMainLayout);
         mAdapter = new AppLayoutAdapters(mActivity, mDatas);
         mListView.setAdapter(mAdapter);
-        mAdapter.setOnListClickListener(this);
         mListView.addHeaderView(
                 LayoutInflater.from(mActivity).inflate(R.layout.main_list_header, null, false));
 
@@ -157,6 +166,11 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
     public void initListener() {
         mRefresh.setOnClickListener(this);
         mClean.setOnClickListener(this);
+        mAdapter.setOnListClickListener(this);
+
+        mRefresh.setOnHoverListener(this);
+        mClean.setOnHoverListener(this);
+        mAdapter.setOnHoverListener(this);
 
         mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -170,6 +184,10 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
 
             }
         });
+    }
+
+    public HoverTextView getHoverText() {
+        return getHoverText();
     }
 
     private void initAllDatas() {
@@ -567,11 +585,64 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
                 mActivity.retrieveRunning();
                 break;
             case R.id.clean:
-                Log.i("ljh", "clean");
-                Set<String> preventPkgNames = getPreventPkgNames(mActivity);
-                Log.i("ljh", "size " + preventPkgNames.size());
+                for (String packageName : mAllDatasMap.keySet()) {
+                    AppInfo appInfo = mAllDatasMap.get(packageName);
+                    if (appInfo.getRunState(mActivity) == Constants.FORWARD_APP) {
+                        forceStopAPK(packageName);
+                    }
+                }
                 break;
         }
+    }
+
+    @Override
+    public boolean onHover(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_HOVER_ENTER:
+                if (v.getId() == R.id.layout) {
+                    v.setBackgroundColor(getResources().getColor(R.color.theme));
+                } else {
+                    mHoverText.show(v, getHoverText(v));
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (v.getId() == R.id.layout) {
+                    v.setBackgroundColor(getResources().getColor(R.color.transparent));
+                } else {
+                    mHoverText.dismiss();
+                }
+                break;
+        }
+
+        return false;
+    }
+
+    private String getHoverText(View view) {
+        AppInfo appInfo = null;
+        if (view.getTag() != null) {
+            appInfo = (AppInfo) view.getTag();
+        }
+        switch (view.getId()) {
+            case R.id.refresh:
+                return getString(R.string.refresh);
+            case R.id.clean:
+                return getString(R.string.stop_running_application);
+            case R.id.dormant:
+                return getString(R.string.dormant);
+            case R.id.add_or_remove:
+                if (appInfo.isNonDormant()) {
+                    return getString(R.string.non_dormant);
+                } else {
+                    return getString(R.string.add_non_dormant_list);
+                }
+            case R.id.prevent:
+                if (appInfo.isAutoPrevent()) {
+                    return getString(R.string.auto_prevent);
+                } else {
+                    return getString(R.string.remove);
+                }
+        }
+        return "";
     }
 
     private static class Position {
@@ -641,6 +712,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
                 }
             });
         }
+
     }
 
     /**

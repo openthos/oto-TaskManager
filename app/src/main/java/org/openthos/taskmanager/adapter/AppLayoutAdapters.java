@@ -16,6 +16,7 @@ import java.util.List;
 public class AppLayoutAdapters extends BasicAdapter {
     private List<AppLayoutInfo> mDatas;
     private OnListClickListener mOnListClickListener;
+    private View.OnHoverListener mOnHoverListener;
 
     public AppLayoutAdapters(Context context, List<AppLayoutInfo> datas) {
         super(context);
@@ -54,12 +55,18 @@ public class AppLayoutAdapters extends BasicAdapter {
         holder.listView.setAdapter(adapter);
         adapter.refreshList();
         adapter.setOnListClickListener(mOnListClickListener);
+        adapter.setOnHoverListener(mOnHoverListener);
         return convertView;
     }
 
     public void setOnListClickListener(OnListClickListener onListClickListener) {
         mOnListClickListener = onListClickListener;
     }
+
+    public void setOnHoverListener(View.OnHoverListener onHoverListener) {
+        mOnHoverListener = onHoverListener;
+    }
+
 
     @Override
     public void refreshList() {
