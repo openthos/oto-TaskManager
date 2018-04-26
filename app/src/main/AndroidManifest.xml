@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.openthos.taskmanager"
+          package="org.openthos.taskmanager"
           android:installLocation="internalOnly">
 
     <permission
-        android:name="com.openthos.taskmanager.permission.MANAGER"
+        android:name="org.openthos.taskmanager.permission.MANAGER"
         android:protectionLevel="signature"/>
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <!--<permission android:name="android.permission.ACCESS_SUPERUSER"/>-->
     <uses-permission android:name="com.android.vending.BILLING"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="com.openthos.taskmanager.permission.MANAGER"/>
+    <uses-permission android:name="org.openthos.taskmanager.permission.MANAGER"/>
 
     <application
         android:allowBackup="true"
@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.openthos.taskmanager.MainActivity">
+        <activity android:name="org.openthos.taskmanager.MainActivity">
             <intent-filter>
             <action android:name="android.intent.action.MAIN"/>
 
@@ -38,21 +38,21 @@
             android:value="2.1+"/>
 
         <activity
-            android:name="com.openthos.taskmanager.piebridge.prevent.ui.PreventActivity"
+            android:name="org.openthos.taskmanager.piebridge.prevent.ui.PreventActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden">
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN"/>-->
-                <!--<action android:name="com.openthos.taskmanager.piebridge.prevent.NOT_SUPPORTED"/>-->
+                <!--<action android:name="org.openthos.taskmanager.piebridge.prevent.NOT_SUPPORTED"/>-->
 
                 <!--<category android:name="android.intent.category.LAUNCHER"/>-->
             <!--</intent-filter>-->
         </activity>
 
         <provider
-            android:name="com.openthos.taskmanager.piebridge.prevent.ui.PreventProvider"
-            android:authorities="com.openthos.taskmanager.piebridge.prevent.provider"
+            android:name="org.openthos.taskmanager.piebridge.prevent.ui.PreventProvider"
+            android:authorities="org.openthos.taskmanager.piebridge.prevent.provider"
             android:permission="android.permission.SHUTDOWN"/>
     </application>
 
