@@ -56,7 +56,7 @@ public class AppListAdapter extends BasicAdapter {
         holder.icon.setImageDrawable(appInfo.getIcon());
         holder.name.setText(appInfo.getAppName());
         holder.cpu.setText(appInfo.isRun() ? appInfo.getCpuUsage() : "");
-        holder.memory.setText(ToolUtils.transformFileSize(appInfo.getMemoryUsage(mContext)));
+        holder.memory.setText(appInfo.getMemoryUsage());
 
         switch (appInfo.getDormantState()) {
             case Constants.APP_NON_DORMANT:

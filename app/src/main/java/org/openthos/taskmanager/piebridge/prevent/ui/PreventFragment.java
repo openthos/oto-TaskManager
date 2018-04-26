@@ -1,5 +1,6 @@
 package org.openthos.taskmanager.piebridge.prevent.ui;
 
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -33,6 +35,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.jaredrummler.android.processes.ProcessManager;
+import com.jaredrummler.android.processes.models.AndroidAppProcess;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -188,6 +193,7 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
             } else {
                 appInfo.setRunning(null);
             }
+            appInfo.setMemoryUsage(getMemorySize(packageName));
         }
     }
 
@@ -215,7 +221,22 @@ public class PreventFragment extends BaseFragment implements OnListClickListener
         }
     }
 
+    private double getMemorySize(String pkg) {
+        ActivityManager am = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
+        List<AndroidAppProcess> listInfo = ProcessManager.getRunningAppProcesses();
+        for (AndroidAppProcess info : listInfo) {
+            if (pkg.equals(info.name)) {
+                int[] mempid = new int[]{info.pid};
+                Debug.MemoryInfo[] memoryInfo = am.getProcessMemoryInfo(mempid);
+                double memSize = memoryInfo[0].getTotalPss() / 1024;
+                return memSize;
+            }
+        }
+        return 0.0;
+    }
+
     public void loadData() {
+        Log.i("ljh","loadData");
         mDatas.clear();
         mForwardDatas.clear();
         mNonNeedDormants.clear();

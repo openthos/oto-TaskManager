@@ -27,7 +27,7 @@ public class AppInfo {
     private Drawable icon;
     private List<Integer> pids;
     private double cpuUsage;
-    private long memoryUsage;
+    private double memoryUsage;
 
     private int flags;
     private Set<Long> running;
@@ -105,22 +105,12 @@ public class AppInfo {
         cpuUsage = 0;
     }
 
-    public long getMemoryUsage(Context context) {
-        memoryUsage = 0;
-        if (pids.size() != 0) {
-            if (mManager == null) {
-                mManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            }
-            for (Integer pid : pids) {
-//                memoryUsage +=
-//                        mManager.getProcessMemoryInfo(new int[]{pid})[0].getTotalPrivateDirty();
-            }
-        }
-        return memoryUsage * Constants.KB;
+    public String getMemoryUsage() {
+        return memoryUsage + "MB";
     }
 
-    public void setMemoryUsage(long memoryUsage) {
-        this.memoryUsage += memoryUsage;
+    public void setMemoryUsage(double memoryUsage) {
+        this.memoryUsage = memoryUsage;
     }
 
     public int getFlags() {

@@ -70,7 +70,7 @@ public class AppAdapter extends BasicAdapter {
         AppInfo appInfo = mDatas.get(position);
         holder.nameView.setText(appInfo.getAppName());
         holder.cpuView.setText(appInfo.getCpuUsage());
-        holder.memoryView.setText(ToolUtils.transformFileSize(appInfo.getMemoryUsage(mContext)));
+        holder.memoryView.setText(appInfo.getMemoryUsage());
 
         switch (appInfo.getDormantState()) {
             case Constants.APP_NON_DORMANT:
