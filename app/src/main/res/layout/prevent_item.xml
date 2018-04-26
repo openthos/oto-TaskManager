@@ -101,42 +101,56 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="3"
-            android:gravity="center_vertical">
+            android:layout_weight="1">
 
-            <TextView
+            <ImageView
                 android:id="@+id/dormant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/padding_five"
-                android:background="@drawable/button_style_shape"
-                android:padding="@dimen/padding_five"
-                android:text="@string/dormant"
+                android:layout_marginLeft="@dimen/padding_ten"
+                android:src="@mipmap/sleep"
                 />
 
-            <TextView
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
                 android:id="@+id/add_or_remove"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/padding_five"
-                android:background="@drawable/button_style_shape"
-                android:padding="@dimen/padding_five"
-                android:text="@string/non_dormant"
-                />
-
-            <TextView
-                android:id="@+id/prevent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/padding_five"
-                android:background="@drawable/button_style_shape"
-                android:padding="@dimen/padding_five"
-                android:text="@string/auto_prevent"
+                android:layout_marginLeft="@dimen/padding_ten"
+                android:src="@mipmap/o_protect"
                 />
         </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/line"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/prevent"
+                android:layout_width="@dimen/image_size"
+                android:layout_height="@dimen/image_size"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
 
         <ImageView
             android:id="@+id/item_prevent"

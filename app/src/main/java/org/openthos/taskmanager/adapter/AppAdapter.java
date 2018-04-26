@@ -72,18 +72,13 @@ public class AppAdapter extends BasicAdapter {
         holder.cpuView.setText(appInfo.getCpuUsage());
         holder.memoryView.setText(appInfo.getMemoryUsage());
 
-        switch (appInfo.getDormantState()) {
-            case Constants.APP_NON_DORMANT:
-                holder.addView.setText(mContext.getString(R.string.non_dormant));
-                break;
-            case Constants.App_NON_DEAL:
-                holder.addView.setText(mContext.getString(R.string.wait_dormant));
-                break;
+        holder.prevent.setImageResource(appInfo.isAutoPrevent()
+                ? R.mipmap.ic_menu_block
+                : R.mipmap.ic_menu_prevent);
 
-        }
-        holder.prevent.setText(appInfo.isAutoPrevent()
-                ? mContext.getString(R.string.prevent)
-                : mContext.getString(R.string.remove));
+        holder.addView.setImageResource(appInfo.isNonDormant()
+                ? R.mipmap.o_protect
+                : R.mipmap.add_black);
         holder.dormantView.setTag(appInfo.getPackageName());
         holder.addView.setTag(appInfo.getPackageName());
         holder.prevent.setTag(appInfo.getPackageName());
@@ -140,9 +135,9 @@ public class AppAdapter extends BasicAdapter {
         private ImageView iconView;
         private TextView cpuView;
         private TextView memoryView;
-        private TextView addView;
-        private TextView dormantView;
-        private TextView prevent;
+        private ImageView addView;
+        private ImageView dormantView;
+        private ImageView prevent;
 
         public TextView nameView;
         public TextView summaryView;
@@ -163,9 +158,9 @@ public class AppAdapter extends BasicAdapter {
             preventView = (ImageView) view.findViewById(R.id.item_prevent);
             cpuView = (TextView) view.findViewById(R.id.cpu_usage);
             memoryView = (TextView) view.findViewById(R.id.memory_usage);
-            addView = (TextView) view.findViewById(R.id.add_or_remove);
-            dormantView = (TextView) view.findViewById(R.id.dormant);
-            prevent = (TextView) view.findViewById(R.id.prevent);
+            addView = (ImageView) view.findViewById(R.id.add_or_remove);
+            dormantView = (ImageView) view.findViewById(R.id.dormant);
+            prevent = (ImageView) view.findViewById(R.id.prevent);
 
             layout.setOnClickListener(this);
             addView.setOnClickListener(this);
