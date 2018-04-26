@@ -125,10 +125,10 @@ public class NotificationManagerServiceUtils {
                 if (length == 0x4) {
                     cancelAllNotificationsInt.invoke(notificationManagerService, packageName, flag, 0, true);
                 } else if (length == 0x5) {
-                    cancelAllNotificationsInt.invoke(notificationManagerService, packageName, flag, 0, true, UserHandle.USER_ALL);
+//                    cancelAllNotificationsInt.invoke(notificationManagerService, packageName, flag, 0, true, UserHandle.USER_ALL);
                 } else if (length == 0x9) {
-                    cancelAllNotificationsInt.invoke(notificationManagerService, uid, pid, packageName, flag, 0, true,
-                            UserHandle.USER_ALL, REASON_PACKAGE_CHANGED, null);
+//                    cancelAllNotificationsInt.invoke(notificationManagerService, uid, pid, packageName, flag, 0, true,
+//                            UserHandle.USER_ALL, REASON_PACKAGE_CHANGED, null);
                 }
             }
             return true;

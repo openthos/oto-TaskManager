@@ -383,7 +383,7 @@ public final class SystemHook {
         for (File file : proc.listFiles()) {
             if (file.isDirectory() && TextUtils.isDigitsOnly(file.getName())) {
                 int pid = Integer.parseInt(file.getName());
-                int uid = HideApiUtils.getUidForPid(pid);
+                int uid = HideApiUtils.getUidForPid(file.getName());
                 if (HideApiUtils.getParentPid(pid) == 1 && uid >= FIRST_APPLICATION_UID) {
                     killIfNeed(uid, pid);
                 }

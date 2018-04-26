@@ -17,22 +17,22 @@ public class HideApiUtils {
 
     }
 
-    public static int getUidForPid(int pid) {
-        return Process.getUidForPid(pid);
+    public static int getUidForPid(String pid) {
+        return Process.getUidForName(pid);
     }
 
     public static int getParentPid(int pid) {
         String[] procStatusLabels = {"PPid:"};
         long[] procStatusValues = new long[1];
         procStatusValues[0] = -1;
-        Process.readProcLines("/proc/" + pid + "/status", procStatusLabels, procStatusValues);
+//        Process.readProcLines("/proc/" + pid + "/status", procStatusLabels, procStatusValues);
         return (int) procStatusValues[0];
     }
 
     public static void forceStopPackage(Context context, String packageName) {
         try {
             ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            activityManager.forceStopPackage(packageName);
+//            activityManager.forceStopPackage(packageName);
             AlarmManagerServiceUtils.releaseAlarm(context, packageName);
         } catch (Throwable t) { // NOSONAR
             PreventLog.e("cannot force stop package" + packageName, t);

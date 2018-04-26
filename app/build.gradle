@@ -43,8 +43,3 @@ dependencies {
     provided fileTree(dir: 'lib', include: ['*.jar'])
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-    options.compilerArgs << '-Xbootclasspath/p:' + fileTree(dir: 'lib', include: ['*.jar']).asPath
-}

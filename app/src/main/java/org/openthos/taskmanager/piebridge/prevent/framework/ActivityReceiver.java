@@ -79,7 +79,7 @@ abstract class ActivityReceiver extends BroadcastReceiver {
             return false;
         }
         try {
-            if (HideApiUtils.getUidForPid(pid) != uid) {
+            if (HideApiUtils.getUidForPid(packageName) != uid) {
                 return false;
             }
         } catch (Throwable t) { // NOSONAR
