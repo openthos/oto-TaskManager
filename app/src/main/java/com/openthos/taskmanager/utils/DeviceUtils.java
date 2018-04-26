@@ -208,29 +208,30 @@ public class DeviceUtils {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static long getTotalMemory(Context c) {
         // memInfo.totalMem not supported in pre-Jelly Bean APIs.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-            ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-            am.getMemoryInfo(memInfo);
-            if (memInfo != null) {
-                return memInfo.totalMem;
-            } else {
-                return DEVICEINFO_UNKNOWN;
-            }
-        } else {
-            long totalMem = DEVICEINFO_UNKNOWN;
-            try {
-                FileInputStream stream = new FileInputStream("/proc/meminfo");
-                try {
-                    totalMem = parseFileForValue("MemTotal", stream);
-                    totalMem *= 1024;
-                } finally {
-                    stream.close();
-                }
-            } catch (IOException e) {
-            }
-            return totalMem;
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//            ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+//            ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+//            am.getMemoryInfo(memInfo);
+//            if (memInfo != null) {
+//                return memInfo.totalMem;
+//            } else {
+//                return DEVICEINFO_UNKNOWN;
+//            }
+//        } else {
+//            long totalMem = DEVICEINFO_UNKNOWN;
+//            try {
+//                FileInputStream stream = new FileInputStream("/proc/meminfo");
+//                try {
+//                    totalMem = parseFileForValue("MemTotal", stream);
+//                    totalMem *= 1024;
+//                } finally {
+//                    stream.close();
+//                }
+//            } catch (IOException e) {
+//            }
+//            return totalMem;
+//        }
+        return 0;
     }
 
     /**

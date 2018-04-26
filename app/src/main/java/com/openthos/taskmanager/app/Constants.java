@@ -3,6 +3,7 @@ package com.openthos.taskmanager.app;
 public class Constants {
     public static final String SP_DORMANT_APP = "dormant_app";
     public static final String SP_NON_DORMANT_APP = "non_dormant_app";
+    public static final String SP_PREVENT_APP = "prevent_app";
 
     public static final int HEIGHT_MASK = 0x3fffffff;
 

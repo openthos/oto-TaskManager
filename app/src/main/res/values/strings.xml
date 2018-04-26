@@ -1,31 +1,133 @@
 <resources>
-    <string name="app_name">任务管理器</string>
-    <string name="running">正在运行</string>
-    <string name="dormant_list">休眠列表</string>
-    <string name="dormant">休眠</string>
-    <string name="all_app">所有应用</string>
-    <string name="application_name">应用名</string>
-    <string name="state">状态</string>
-    <string name="add_dormant_list">加入休眠列表</string>
-    <string name="immediately_dormant">立即休眠</string>
-    <string name="dormant_add_list">休眠并加入休眠列表</string>
-    <string name="is_in_dormant_list">是否在休眠列表</string>
-    <string name="stop_run">停止运行</string>
-    <string name="remove_dormant_list">移除休眠列表</string>
+    <string name="app_name">Task manager</string>
+    <string name="running">running</string>
+    <string name="dormant_list">dormant list</string>
+    <string name="dormant">dormant</string>
+    <string name="all_app">all app</string>
+    <string name="application_name">application name</string>
+    <string name="state">state</string>
+    <string name="add_dormant_list">add dormant list</string>
+    <string name="immediately_dormant">immediately dormant</string>
+    <string name="dormant_add_list">dormant add list</string>
+    <string name="is_in_dormant_list">is in dormant list</string>
+    <string name="stop_run">stop run</string>
+    <string name="remove_dormant_list">remove dormant list</string>
     <string name="pid">pid</string>
-    <string name="battery_usage">电池使用情况</string>
-    <string name="memory_usage">内存使用情况</string>
-    <string name="cpu_usage">cpu使用情况</string>
-    <string name="have_dormant">已休眠</string>
-    <string name="wait_dormant">待休眠</string>
-    <string name="non_dormant">无需休眠</string>
-    <string name="add_or_remove">添加/移除</string>
-    <string name="cpu_frequence">CPU主频：%.2fGHz</string>
-    <string name="cpu_use">CPU占用：%.2f%%</string>
-    <string name="battery_state">电池状态：%s</string>
-    <string name="battery_charge">当前电量：%d%%</string>
-    <string name="charging">充电中</string>
-    <string name="discharging">未充电</string>
-    <string name="battery_full">充满</string>
-    <string name="battery_none">无电池</string>
+    <string name="battery_usage">battery usage</string>
+    <string name="memory_usage">memory usage</string>
+    <string name="cpu_usage">cpu usage</string>
+    <string name="have_dormant">have dormant</string>
+    <string name="wait_dormant">wait dormant</string>
+    <string name="non_dormant">non dormant</string>
+    <string name="add_or_remove">add or remove</string>
+    <string name="cpu_frequence">cpu frequence：%.2fGHz</string>
+    <string name="cpu_use">cpu use：%.2f%%</string>
+    <string name="battery_state">battery state：%s</string>
+    <string name="battery_charge">battery charge：%d%%</string>
+    <string name="charging">charging</string>
+    <string name="discharging">discharging</string>
+    <string name="battery_full">battery full</string>
+    <string name="battery_none">battery none</string>
+
+    <string name="soak_version">This is not a release version, and may block your device. If you don\'t like to be participate, please uninstall and restore to release version.</string>
+
+    <!-- xposed -->
+    <string name="xposed_summary">Prevent applications from running.</string>
+    <string name="xposed_disabled">Please enable \"Prevent Running\" in \"Xposed Installer\", or disable then enable \"Prevent Running\".</string>
+    <string name="install_internal">Prevent Running should be installed in internal storage.</string>
+    <string name="no_xposed">Please install Xposed Installer.</string>
+
+    <!-- receiver -->
+    <string name="no_prevents">Please configure prevent list.</string>
+    <string name="updated_prevents">Updated prevent list to %1$d</string>
+    <string name="not_supported">ROM is not supported, please report bug.</string>
+
+    <!-- prevent_main activity -->
+    <string name="version_mismatch">Please reboot to active current version</string>
+    <string name="reboot">Reboot</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="applications">Applications</string>
+    <string name="prevent_list">Prevent List</string>
+    <string name="prevent">Auto Prevent</string>
+    <string name="remove">Remove Prevent</string>
+
+    <!-- search hint -->
+    <string name="query_hint">\"-3\" for user\'s apps</string>
+    <string name="query_hint_system">\"-s\" for system apps</string>
+
+    <!-- prevent_main menu -->
+    <string name="switch_theme">Switch theme</string>
+    <string name="user_guide">User guide</string>
+
+    <!-- app status -->
+    <string name="retrieving">Retrieving status, please wait. . .</string>
+    <string name="loading">Loading. . .</string>
+    <string name="not_running">(not running)</string>
+    <!-- http://developer.android.com/reference/android/app/ActivityManager.RunningAppProcessInfo.html#constants -->
+    <string name="importance_background">Background</string>
+    <string name="importance_foreground">Foreground</string>
+    <string name="importance_empty">Empty</string>
+    <string name="importance_perceptible">Perceptible</string>
+    <string name="importance_service">Service</string>
+    <string name="importance_visible">Visible</string>
+    <string name="importance_gone">Gone</string>
+    <string name="importance_foreground_service">Foreground Service</string>
+    <string name="importance_top_sleeping">Top Sleeping</string>
+    <string name="importance_service_not_started">Service (Not started)</string>
+
+    <!-- app menu -->
+    <string name="app_info">App Info</string>
+    <string name="open">Open</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="app_notifications">App notifications</string>
+
+    <!-- advanced settings -->
+    <string name="destroy_processes">Don\'t keep processes</string>
+    <string name="destroy_processes_summary">Force stop applications after the user destroys all activities (recommend off)</string>
+    <string name="backup">Backup</string>
+    <string name="backup_prevent_list">Back up prevent list to external storage</string>
+    <string name="lock_sync">Lock Sync</string>
+    <string name="lock_sync_settings">Prevent apps from turning on disabled sync items</string>
+    <string name="auto_prevent">Auto Prevent</string>
+    <string name="auto_update_prevent">Auto prevent new app</string>
+    <string name="use_app_standby">App Standby</string>
+    <string name="use_app_standby_settings">Use standby instead of force stopping</string>
+    <string name="allow_empty_sender">Allow Unknown Sender</string>
+    <string name="allow_empty_sender_in_service">Allow unknown sender to start service, which is useful to open some apps directly through notification or widget, however, it may has side effects</string>
+    <string name="force_stop_signature_apps">Force Stop Signature Apps</string>
+    <string name="force_stop_uncheckable_signature_apps">It\'s uncheckable, and cannot be added to prevent list without a \"prevent all\" license</string>
+    <string name="force_stop_label">Force stop background apps</string>
+    <string name="force_stop_summary">Screen is off, and after %1$s of inactivity with background apps</string>
+    <string name="force_stop_never">Never (Recommend)</string>
+    <string name="force_stop_5min">5 minutes</string>
+    <string name="force_stop_10min">10 minutes</string>
+    <string name="force_stop_15min">15 minutes</string>
+    <string name="force_stop_30min">30 minutes</string>
+    <string name="force_stop_1hour">1 hour</string>
+
+    <!-- request license -->
+    <string name="no_license">Please donate at least 2 usd, then contact the author to get license.</string>
+    <string name="no_valid_license">This license is for \"%1$s\", you have no permission to use it. Please request for a new one.</string>
+    <string name="email_request">Email</string>
+    <string name="copy_request">@android:string/copy</string>
+
+    <!-- user guide menu -->
+    <string name="donate">Donate</string>
+    <string name="version">Version</string>
+    <string name="feedback">Feedback</string>
+    <string name="report_bug">Report Bug</string>
+    <string name="request_license">Request license</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="choose_email">Please choose EMail client</string>
+
+    <!-- donation -->
+    <string name="donation">Feel free to donate if you like.</string>
+    <string name="select_qr_code">Please click menu, choose QR Code from Album</string>
+    <string name="paypal">PayPal</string>
+
+    <!-- version -->
+    <string name="licensed">Licensed</string>
+
+    <!-- google play in-app billing -->
+    <string name="play_verify_error">Fail to verify your purchase, please don\'t crack Google Play In-app Billing.</string>
 </resources>

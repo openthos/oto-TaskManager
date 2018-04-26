@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line"/>
+
     <LinearLayout
         android:id="@+id/layout"
         style="@style/ItemLayoutStyle"
@@ -79,38 +84,9 @@
             />
 
         <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/line"
-            android:visibility="gone"/>
-
-
-        <TextView
-            android:id="@+id/dormant"
-            style="@style/ItemTextStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/dormant"
-            />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/line"/>
-
-        <TextView
-            android:id="@+id/add_or_remove"
-            style="@style/ItemTextStyle"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            />
+            android:layout_weight="3"/>
 
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/line"/>
 </LinearLayout>

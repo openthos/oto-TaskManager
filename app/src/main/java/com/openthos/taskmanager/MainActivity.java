@@ -9,11 +9,13 @@ import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.openthos.taskmanager.adapter.AppLayoutAdapter;
 import com.openthos.taskmanager.app.Constants;
@@ -21,11 +23,14 @@ import com.openthos.taskmanager.bean.AppInfo;
 import com.openthos.taskmanager.bean.AppLayoutInfo;
 import com.openthos.taskmanager.listener.OnCpuChangeListener;
 import com.openthos.taskmanager.listener.OnListClickListener;
+import com.openthos.taskmanager.piebridge.prevent.framework.util.PreventListUtils;
+import com.openthos.taskmanager.piebridge.prevent.ui.util.PreventUtils;
 import com.openthos.taskmanager.utils.DeviceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -118,15 +123,15 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         Map<String, AppInfo> appInfosMap = getAppInfosMap();
         for (String packageName : appInfosMap.keySet()) {
             AppInfo appInfo = getAppInfoByPkgName(packageName);
-            if (appInfo.isRun()) {
-                switch (appInfo.getDormantState()) {
-                    case Constants.APP_NON_DORMANT:
-                        mNonNeedDormants.add(appInfo);
-                        break;
-                    case Constants.App_NON_DEAL:
-                        mWaitDormants.add(appInfo);
-                        break;
-                }
+//            if (appInfo.isRun()) {
+            switch (appInfo.getDormantState()) {
+                case Constants.APP_NON_DORMANT:
+                    mNonNeedDormants.add(appInfo);
+                    break;
+                case Constants.App_NON_DEAL:
+                    mWaitDormants.add(appInfo);
+                    break;
+//                }
             }
         }
         if (mNonNeedDormants.size() != 0) {
@@ -196,13 +201,14 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
     @Override
     public void onListClickListener(View view, String packageName) {
+        AppInfo appInfoByPkgName = getAppInfoByPkgName(packageName);
         switch (view.getId()) {
             case R.id.dormant:
                 forceStopAPK(packageName);
                 loadData();
                 break;
             case R.id.add_or_remove:
-                switch (getAppInfoByPkgName(packageName).getDormantState()) {
+                switch (appInfoByPkgName.getDormantState()) {
                     case Constants.APP_NON_DORMANT:
                         addNonDormantList(packageName, false);
                         break;
@@ -211,6 +217,14 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                         break;
                 }
                 loadData();
+                break;
+            case R.id.prevent:
+                addPreventList(packageName, !appInfoByPkgName.isAutoPrevent());
+                loadData();
+                Set<String> load = PreventListUtils.getInstance().load(this);
+                for (String s:load){
+                    Log.i("llll","pack " + load);
+                }
                 break;
         }
     }

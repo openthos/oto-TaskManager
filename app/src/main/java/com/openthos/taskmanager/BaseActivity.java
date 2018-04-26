@@ -19,8 +19,10 @@ import java.util.Map;
 
 import com.openthos.taskmanager.bean.AppInfo;
 import com.openthos.taskmanager.listener.OnCpuChangeListener;
+import com.openthos.taskmanager.piebridge.prevent.ui.util.PreventUtils;
 import com.openthos.taskmanager.utils.DormantAppUtils;
 import com.openthos.taskmanager.utils.NonDormantAppUtils;
+import com.openthos.taskmanager.utils.PreventAppUtils;
 
 public abstract class BaseActivity extends FragmentActivity {
 
@@ -46,6 +48,7 @@ public abstract class BaseActivity extends FragmentActivity {
         PackageManager manager = getPackageManager();
         List<PackageInfo> packageInfos = manager.getInstalledPackages(0);
         Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(this).getAllAddedApp();
+        Map<String, String> preventMaps = PreventAppUtils.getInstance(this).getAllAddedApp();
         AppInfo appInfo;
         for (PackageInfo packageInfo : packageInfos) {
             if (isSystemApps(packageInfo)) {
@@ -60,6 +63,12 @@ public abstract class BaseActivity extends FragmentActivity {
                 appInfo.setNonDormant(true);
             } else {
                 appInfo.setNonDormant(false);
+            }
+
+            if (preventMaps != null && preventMaps.containsKey(appInfo.getPackageName())) {
+                appInfo.setAutoPrevent(true);
+            } else {
+                appInfo.setAutoPrevent(false);
             }
             mNotSystemApps.put(appInfo.getPackageName(), appInfo);
         }
@@ -119,6 +128,27 @@ public abstract class BaseActivity extends FragmentActivity {
             } else {
                 NonDormantAppUtils.getInstance(this).removeAddApp(packageName);
                 appInfo.setNonDormant(false);
+            }
+        }
+    }
+
+    /**
+     * Store the package name as packageName or remove the saved SP
+     *
+     * @param packageName
+     * @param isAdd
+     */
+    public void addPreventList(String packageName, boolean isAdd) {
+        AppInfo appInfo = mNotSystemApps.get(packageName);
+        if (appInfo != null) {
+            if (isAdd) {
+                PreventAppUtils.getInstance(this).saveAddedApp(packageName, appInfo.getAppName());
+                appInfo.setAutoPrevent(true);
+                PreventUtils.updatePreventPkg(this, new String[]{packageName}, true);
+            } else {
+                PreventAppUtils.getInstance(this).removeAddApp(packageName);
+                appInfo.setAutoPrevent(false);
+                PreventUtils.updatePreventPkg(this, new String[]{packageName}, false);
             }
         }
     }

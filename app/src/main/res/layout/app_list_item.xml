@@ -87,37 +87,41 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="3"
+            android:gravity="center_vertical">
 
-            <ImageView
+            <TextView
                 android:id="@+id/dormant"
-                android:layout_width="@dimen/image_size"
-                android:layout_height="@dimen/image_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/padding_five"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/padding_ten"
-                android:src="@mipmap/sleep"
+                android:text="@string/dormant"
+                android:background="@drawable/button_style_shape"
+                android:padding="@dimen/padding_five"
                 />
 
-        </LinearLayout>
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/line"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <ImageView
+            <TextView
                 android:id="@+id/add_or_remove"
-                android:layout_width="@dimen/image_size"
-                android:layout_height="@dimen/image_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/padding_five"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/padding_ten"
+                android:text="@string/non_dormant"
+                android:background="@drawable/button_style_shape"
+                android:padding="@dimen/padding_five"
                 />
 
+            <TextView
+                android:id="@+id/prevent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/padding_five"
+                android:layout_gravity="center_vertical"
+                android:text="@string/auto_prevent"
+                android:background="@drawable/button_style_shape"
+                android:padding="@dimen/padding_five"
+                />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

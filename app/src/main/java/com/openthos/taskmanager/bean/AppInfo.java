@@ -23,6 +23,7 @@ public class AppInfo {
     private boolean isRun;
     private boolean isDormant;
     private boolean isNonDormant;
+    private boolean isAutoPrevent;
 
     public AppInfo() {
         pids = new ArrayList<>();
@@ -88,8 +89,8 @@ public class AppInfo {
                 mManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             }
             for (Integer pid : pids) {
-                memoryUsage +=
-                        mManager.getProcessMemoryInfo(new int[]{pid})[0].getTotalPrivateDirty();
+//                memoryUsage +=
+//                        mManager.getProcessMemoryInfo(new int[]{pid})[0].getTotalPrivateDirty();
             }
         }
         return memoryUsage * Constants.KB;
@@ -148,6 +149,14 @@ public class AppInfo {
         processNames.clear();
         pids.clear();
         cpuUsage = 0;
+    }
+
+    public boolean isAutoPrevent() {
+        return isAutoPrevent;
+    }
+
+    public void setAutoPrevent(boolean autoPrevent) {
+        isAutoPrevent = autoPrevent;
     }
 
     public Intent getIntent(Context context) {

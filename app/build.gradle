@@ -9,7 +9,12 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+//        buildConfigField "boolean", "RELEASE", "false"
+//        buildConfigField "boolean", "DONATE", "false"
+//        buildConfigField "String", "DONATE_ALIPAY", "null"
+//        buildConfigField "String", "DONATE_PAYPAL", "null"
+//        buildConfigField "String", "EMAIL", "null"
     }
     buildTypes {
         release {
@@ -17,15 +22,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+    }
+
+    if (new File("ant.properties").exists()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(file("ant.properties")))
+    }
 }
 
 dependencies {
+    provided fileTree(dir: 'lib', include: ['*.jar'])
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:26.+'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-v4:26.+'
-    testCompile 'junit:junit:4.12'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+    options.compilerArgs << '-Xbootclasspath/p:' + fileTree(dir: 'lib', include: ['*.jar']).asPath
 }

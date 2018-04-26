@@ -4,6 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="color_dangerous_light">#3CF83A3A</color>
+    <color name="color_dangerous_dark">#50F83A3A</color>
+
     <color name="line">@color/lightgray</color>
     <color name="theme">#87CEFA</color>
     <color name="main_bg">#f0eff5</color>

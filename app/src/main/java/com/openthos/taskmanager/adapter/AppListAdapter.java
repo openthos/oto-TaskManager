@@ -59,16 +59,20 @@ public class AppListAdapter extends BasicAdapter {
         holder.memory.setText(ToolUtils.transformFileSize(appInfo.getMemoryUsage(mContext)));
         holder.battery.setText(appInfo.getBatteryUsage());
 
-        switch (appInfo.getDormantState()){
+        switch (appInfo.getDormantState()) {
             case Constants.APP_NON_DORMANT:
-                holder.add.setBackground(getDrawable(R.mipmap.o_remove));
+                holder.add.setText(mContext.getString(R.string.non_dormant));
                 break;
             case Constants.App_NON_DEAL:
-                holder.add.setBackground(getDrawable(R.mipmap.o_protect));
+                holder.add.setText(mContext.getString(R.string.wait_dormant));
                 break;
         }
+        holder.prevent.setText(appInfo.isAutoPrevent()
+                ? mContext.getString(R.string.prevent)
+                : mContext.getString(R.string.remove));
         holder.dormant.setTag(appInfo.getPackageName());
         holder.add.setTag(appInfo.getPackageName());
+        holder.prevent.setTag(appInfo.getPackageName());
         holder.layout.setTag(appInfo.getPackageName());
         return convertView;
     }
@@ -93,8 +97,9 @@ public class AppListAdapter extends BasicAdapter {
         private TextView cpu;
         private TextView memory;
         private TextView battery;
-        private ImageView add;
-        private ImageView dormant;
+        private TextView add;
+        private TextView dormant;
+        private TextView prevent;
         ;
 
         public ViewHolder(View view) {
@@ -104,11 +109,13 @@ public class AppListAdapter extends BasicAdapter {
             cpu = (TextView) view.findViewById(R.id.cpu_usage);
             memory = (TextView) view.findViewById(R.id.memory_usage);
             battery = (TextView) view.findViewById(R.id.battery_usage);
-            add = (ImageView) view.findViewById(R.id.add_or_remove);
-            dormant = (ImageView) view.findViewById(R.id.dormant);
+            add = (TextView) view.findViewById(R.id.add_or_remove);
+            dormant = (TextView) view.findViewById(R.id.dormant);
+            prevent = (TextView) view.findViewById(R.id.prevent);
             layout.setOnClickListener(this);
             add.setOnClickListener(this);
             dormant.setOnClickListener(this);
+            prevent.setOnClickListener(this);
             layout.setOnHoverListener(this);
         }
 
@@ -123,7 +130,7 @@ public class AppListAdapter extends BasicAdapter {
         public boolean onHover(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_HOVER_ENTER:
-                    v.setBackgroundColor(mContext.getResources().getColor(R.color.hint_color));
+                    v.setBackgroundColor(mContext.getResources().getColor(R.color.theme));
                     break;
                 case MotionEvent.ACTION_HOVER_EXIT:
                     v.setBackgroundColor(mContext.getResources().getColor(R.color.white));
