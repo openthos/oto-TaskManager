@@ -30,6 +30,13 @@ android {
         Properties properties = new Properties()
         properties.load(new FileInputStream(file("ant.properties")))
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
 }
 
 dependencies {
