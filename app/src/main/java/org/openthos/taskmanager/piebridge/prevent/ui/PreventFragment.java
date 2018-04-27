@@ -53,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.openthos.taskmanager.BaseFragment;
+import org.openthos.taskmanager.MainActivity;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.adapter.AppAdapter;
 import org.openthos.taskmanager.adapter.AppLayoutAdapters;
@@ -95,6 +96,7 @@ public class PreventFragment extends BaseFragment
 
     private Handler mHandler;
     private BatteryChangeReceiver mBatteryChangeReceiver;
+    private AppInstallReceiver mAppInstallReceiver;
     private double mCpuMaxFreqGHz;
     private RefreshRunnable mRefreshRunnable;
 
@@ -106,6 +108,7 @@ public class PreventFragment extends BaseFragment
     private double mTotalCpuUsed;
     private Map<String, Double> mCpuMap;
     private boolean mIsLoadFinished;
+
 
     public PreventFragment() {
     }
@@ -158,6 +161,7 @@ public class PreventFragment extends BaseFragment
         mHandler = new Handler();
         mRefreshRunnable = new RefreshRunnable();
         registBatteryReceiver();
+        registAppInstallReceiver();
         mCpuMaxFreqGHz = DeviceUtils.getCurCpuFreq();
         mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
         mCpuUse.setText(getString(R.string.cpu_use, 0.0));
@@ -256,6 +260,9 @@ public class PreventFragment extends BaseFragment
     }
 
     public void loadData() {
+        if (!mIsLoadFinished) {
+            return;
+        }
         mIsLoadFinished = false;
         mDatas.clear();
         mForwardDatas.clear();
@@ -307,6 +314,16 @@ public class PreventFragment extends BaseFragment
         mActivity.registerReceiver(mBatteryChangeReceiver, filter);
     }
 
+    private void registAppInstallReceiver() {
+        mAppInstallReceiver = new AppInstallReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mActivity.registerReceiver(mAppInstallReceiver, filter);
+    }
+
     @Override
     public void onPause() {
         saveListPosition();
@@ -318,6 +335,10 @@ public class PreventFragment extends BaseFragment
         if (mBatteryChangeReceiver != null) {
             mActivity.unregisterReceiver(mBatteryChangeReceiver);
             mBatteryChangeReceiver = null;
+        }
+        if (mAppInstallReceiver != null) {
+            mActivity.unregisterReceiver(mAppInstallReceiver);
+            mAppInstallReceiver = null;
         }
         super.onDestroy();
     }
@@ -535,7 +556,6 @@ public class PreventFragment extends BaseFragment
 
     public void notifyDataSetChanged() {
         if (mIsLoadFinished) {
-            mIsLoadFinished = false;
             mFixedThreadPool.execute(mRefreshRunnable);
         }
     }
@@ -690,6 +710,28 @@ public class PreventFragment extends BaseFragment
                     mBattertState.setText(
                             getString(R.string.battery_state, getString(R.string.battery_none)));
                     mBatteryCharge.setVisibility(View.GONE);
+                    break;
+            }
+        }
+    }
+
+    private class AppInstallReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String packageName = intent.getData().getSchemeSpecificPart();
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_ADDED:
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            initAllDatas();
+                        }
+                    },500);
+                    break;
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    mAllDatasMap.remove(packageName);
+                    break;
+                case Intent.ACTION_PACKAGE_REPLACED:
                     break;
             }
         }
