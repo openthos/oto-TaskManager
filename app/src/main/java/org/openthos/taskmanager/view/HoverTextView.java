@@ -2,7 +2,6 @@ package org.openthos.taskmanager.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -42,20 +41,9 @@ public class HoverTextView extends TextView {
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getLayoutParams());
         params.leftMargin = location[0] + view.getMeasuredWidth() / 2 - getMeasuredWidth() / 2 - mParentPosition[0];
         params.topMargin = location[1] + view.getMeasuredHeight() - mParentPosition[1];
-//        if (params.leftMargin < 0) {
-//            params.leftMargin = 0;
-//        } else if (params.leftMargin > mParentView.getMeasuredWidth() - getMeasuredWidth()) {
-//            params.leftMargin = mParentView.getMeasuredWidth() - getMeasuredWidth();
-//        }
-
-        Log.i("ljh", "---------------------------------");
-        Log.i("ljh", "location " + location[0] + " " + location[1]);
-        Log.i("ljh", "mParentPosition " + mParentPosition[0] + " " + mParentPosition[1]);
-        Log.i("ljh", "view " + view.getMeasuredWidth() + " " + view.getMeasuredHeight());
-        Log.i("ljh", "mParentView " + mParentView.getMeasuredWidth() + " " + mParentView.getMeasuredHeight());
-        Log.i("ljh", "leftMargin " + params.leftMargin);
-        Log.i("ljh", "this " + getMeasuredWidth() + " " + getMeasuredHeight());
-
+        if (params.leftMargin < 0) {
+            params.leftMargin = 0;
+        }
         params.gravity = Gravity.LEFT | Gravity.TOP;
         setLayoutParams(params);
         setVisibility(VISIBLE);

@@ -11,6 +11,7 @@ import org.openthos.taskmanager.bean.AppLayoutInfo;
 import org.openthos.taskmanager.listener.OnListClickListener;
 import org.openthos.taskmanager.view.CustomListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AppLayoutAdapters extends BasicAdapter {
@@ -18,9 +19,9 @@ public class AppLayoutAdapters extends BasicAdapter {
     private OnListClickListener mOnListClickListener;
     private View.OnHoverListener mOnHoverListener;
 
-    public AppLayoutAdapters(Context context, List<AppLayoutInfo> datas) {
+    public AppLayoutAdapters(Context context) {
         super(context);
-        mDatas = datas;
+        mDatas = new ArrayList<>();
     }
 
     @Override
@@ -70,6 +71,14 @@ public class AppLayoutAdapters extends BasicAdapter {
 
     @Override
     public void refreshList() {
+        notifyDataSetChanged();
+    }
+
+    public void refreshList(List<AppLayoutInfo> datas) {
+        mDatas.clear();
+        if (datas != null) {
+            mDatas.addAll(datas);
+        }
         notifyDataSetChanged();
     }
 

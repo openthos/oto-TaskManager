@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openthos.taskmanager.R;
+import org.openthos.taskmanager.app.Constants;
 import org.openthos.taskmanager.piebridge.prevent.common.PackageUtils;
 import org.openthos.taskmanager.piebridge.prevent.common.PreventIntent;
 import org.openthos.taskmanager.piebridge.prevent.ui.util.PreventListUtils;
@@ -365,7 +366,6 @@ public class PreventActivity extends FragmentActivity implements
                 }
                 running.clear();
                 running.putAll(processes);
-                Log.i("ljh","running " + running.size());
                 notifyDataSetChanged();
             } catch (JSONException e) {
                 UILog.e("cannot convert to json", e);
@@ -580,10 +580,10 @@ public class PreventActivity extends FragmentActivity implements
                 if (!paused) {
                     updateTimeIfNeeded(null);
                     retrieveRunning();
-                    mainHandler.postDelayed(this, 1000);
+                    mainHandler.postDelayed(this, Constants.DELAY_TIME_REFRESH);
                 }
             }
-        }, 1000);
+        }, Constants.DELAY_TIME_REFRESH);
     }
 
     @Override

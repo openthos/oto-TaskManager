@@ -8,7 +8,6 @@
 package org.openthos.taskmanager.utils;
 
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 

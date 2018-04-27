@@ -105,6 +105,7 @@ public class PreventFragment extends BaseFragment
     private Map<String, AppInfo> mAllDatasMap;
     private double mTotalCpuUsed;
     private Map<String, Double> mCpuMap;
+    private boolean mIsLoadFinished;
 
     public PreventFragment() {
     }
@@ -143,12 +144,13 @@ public class PreventFragment extends BaseFragment
         mAllDatasMap = new HashMap<>();
         mCpuMap = new HashMap<>();
 
+        mIsLoadFinished = true;
         mActivity = (PreventActivity) getActivity();
         appNotification = PreferenceManager.getDefaultSharedPreferences(mActivity).
                 getBoolean("app_notification", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
         mHoverText.setParentView(mMainLayout);
-        mAdapter = new AppLayoutAdapters(mActivity, mDatas);
+        mAdapter = new AppLayoutAdapters(mActivity);
         mListView.setAdapter(mAdapter);
         mListView.addHeaderView(
                 LayoutInflater.from(mActivity).inflate(R.layout.main_list_header, null, false));
@@ -254,6 +256,7 @@ public class PreventFragment extends BaseFragment
     }
 
     public void loadData() {
+        mIsLoadFinished = false;
         mDatas.clear();
         mForwardDatas.clear();
         mNonNeedDormants.clear();
@@ -290,7 +293,9 @@ public class PreventFragment extends BaseFragment
             @Override
             public void run() {
                 mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
-                mAdapter.refreshList();
+                mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
+                mAdapter.refreshList(mDatas);
+                mIsLoadFinished = true;
             }
         });
     }
@@ -529,7 +534,10 @@ public class PreventFragment extends BaseFragment
     }
 
     public void notifyDataSetChanged() {
-        mFixedThreadPool.execute(mRefreshRunnable);
+        if (mIsLoadFinished) {
+            mIsLoadFinished = false;
+            mFixedThreadPool.execute(mRefreshRunnable);
+        }
     }
 
     @Override
@@ -707,12 +715,12 @@ public class PreventFragment extends BaseFragment
                             appInfo.clearCpuUsage();
                         }
                     }
+                    mCpuMaxFreqGHz = DeviceUtils.getCurCpuFreq();
                     refreshAllDataState();
                     loadData();
                 }
             });
         }
-
     }
 
     /**
