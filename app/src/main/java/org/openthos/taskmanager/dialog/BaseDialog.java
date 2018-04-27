@@ -16,14 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openthos.taskmanager.MainActivity;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.adapter.MenuAdapter;
 import org.openthos.taskmanager.bean.DialogType;
 
 public class BaseDialog extends Dialog{
     private static BaseDialog mBaseDialog;
-    private MainActivity mActivity;
     private ListView mMenuList;
     private MenuAdapter mAdapter;
     private List<String> mDatas;
@@ -37,14 +35,13 @@ public class BaseDialog extends Dialog{
 
     public BaseDialog(@NonNull Context context) {
         super(context, R.style.MenuDialogStyle);
-        mActivity = (MainActivity) context;
         create();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.menu_dialog);
+        setContentView(R.layout.dialog_menu);
         initView();
         initData();
         initListener();

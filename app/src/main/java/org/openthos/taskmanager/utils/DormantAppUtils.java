@@ -23,7 +23,7 @@ public class DormantAppUtils {
     }
 
     /**
-     * Add app to an automatic dormancy prevent_list
+     * Add app to an automatic dormancy fragment_prevent
      *
      * @param packageName
      */
@@ -32,7 +32,7 @@ public class DormantAppUtils {
     }
 
     /**
-     * Get the application stored in the automatic dormancy prevent_list
+     * Get the application stored in the automatic dormancy fragment_prevent
      *
      * @return
      */
@@ -41,7 +41,7 @@ public class DormantAppUtils {
     }
 
     /**
-     * Remove the application added to the auto dormancy prevent_list
+     * Remove the application added to the auto dormancy fragment_prevent
      *
      * @param packageName
      */

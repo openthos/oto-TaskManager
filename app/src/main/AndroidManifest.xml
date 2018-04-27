@@ -19,13 +19,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="org.openthos.taskmanager.MainActivity">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN"/>-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        </activity>
 
         <meta-data
             android:name="xposedmodule"
@@ -38,21 +31,21 @@
             android:value="2.1+"/>
 
         <activity
-            android:name="org.openthos.taskmanager.piebridge.prevent.ui.PreventActivity"
+            android:name="org.openthos.taskmanager.PreventActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                <action android:name="org.openthos.taskmanager.piebridge.prevent.NOT_SUPPORTED"/>
+                <action android:name="org.openthos.taskmanager.prevent.NOT_SUPPORTED"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
         <provider
-            android:name="org.openthos.taskmanager.piebridge.prevent.ui.PreventProvider"
-            android:authorities="org.openthos.taskmanager.piebridge.prevent.provider"
+            android:name="org.openthos.taskmanager.prevent.ui.PreventProvider"
+            android:authorities="org.openthos.taskmanager.prevent.provider"
             android:permission="android.permission.SHUTDOWN"/>
     </application>
 

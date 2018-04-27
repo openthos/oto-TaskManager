@@ -47,7 +47,7 @@
     <string name="updated_prevents">Updated prevent list to %1$d</string>
     <string name="not_supported">ROM is not supported, please report bug.</string>
 
-    <!-- prevent_main activity -->
+    <!-- activity_prevent activity -->
     <string name="version_mismatch">Please reboot to active current version</string>
     <string name="reboot">Reboot</string>
     <string name="are_you_sure">Are you sure?</string>
@@ -60,7 +60,7 @@
     <string name="query_hint">\"-3\" for user\'s apps</string>
     <string name="query_hint_system">\"-s\" for system apps</string>
 
-    <!-- prevent_main menu -->
+    <!-- activity_prevent menu -->
     <string name="switch_theme">Switch theme</string>
     <string name="user_guide">User guide</string>
 

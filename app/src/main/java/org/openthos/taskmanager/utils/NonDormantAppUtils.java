@@ -24,7 +24,7 @@ public class NonDormantAppUtils {
     }
 
     /**
-     * Add app to an automatic non dormancy prevent_list
+     * Add app to an automatic non dormancy fragment_prevent
      *
      * @param packageName
      */
@@ -33,7 +33,7 @@ public class NonDormantAppUtils {
     }
 
     /**
-     * Get the application stored in the automatic non dormancy prevent_list
+     * Get the application stored in the automatic non dormancy fragment_prevent
      *
      * @return
      */
@@ -42,7 +42,7 @@ public class NonDormantAppUtils {
     }
 
     /**
-     * Remove the application added to the auto non dormancy prevent_list
+     * Remove the application added to the auto non dormancy fragment_prevent
      *
      * @param packageName
      */

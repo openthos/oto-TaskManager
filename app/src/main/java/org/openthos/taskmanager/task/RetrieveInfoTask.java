@@ -10,8 +10,8 @@ import android.os.AsyncTask;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
-import org.openthos.taskmanager.piebridge.prevent.ui.PreventActivity;
-import org.openthos.taskmanager.piebridge.prevent.ui.util.LabelLoader;
+import org.openthos.taskmanager.PreventActivity;
+import org.openthos.taskmanager.prevent.ui.util.LabelLoader;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -10,8 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.app.Constants;
-import org.openthos.taskmanager.piebridge.prevent.common.PackageUtils;
-import org.openthos.taskmanager.piebridge.prevent.ui.util.StatusUtils;
+import org.openthos.taskmanager.prevent.common.PackageUtils;
+import org.openthos.taskmanager.prevent.ui.util.StatusUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;

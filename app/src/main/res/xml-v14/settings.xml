@@ -28,7 +28,7 @@
             android:summary="@string/auto_update_prevent"
             android:title="@string/auto_prevent" />
 
-        <org.openthos.taskmanager.piebridge.prevent.ui.ListPreferenceSummary
+        <org.openthos.taskmanager.prevent.ui.ListPreferenceSummary
             android:defaultValue="-1"
             android:entries="@array/force_stop_entries"
             android:entryValues="@array/force_stop_values"

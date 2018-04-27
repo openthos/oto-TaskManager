@@ -47,7 +47,7 @@
     <string name="updated_prevents">成功更新阻止列表，共%1$d条</string>
     <string name="not_supported">暂不支持您的系统，请报告问题。</string>
 
-    <!-- prevent_main activity -->
+    <!-- activity_prevent activity -->
     <string name="version_mismatch">请重启激活当前版本</string>
     <string name="reboot">重启</string>
     <string name="are_you_sure">你确定？</string>
@@ -60,7 +60,7 @@
     <string name="query_hint">\"-3\"为已下载应用</string>
     <string name="query_hint_system">\"-s\"为系统应用</string>
 
-    <!-- prevent_main menu -->
+    <!-- activity_prevent menu -->
     <string name="switch_theme">切换主题</string>
     <string name="user_guide">用户指南</string>
 

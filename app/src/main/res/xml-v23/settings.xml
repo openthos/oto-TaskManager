@@ -34,7 +34,7 @@
             android:summary="@string/use_app_standby_settings"
             android:title="@string/use_app_standby" />
 
-        <org.openthos.taskmanager.piebridge.prevent.ui.ListPreferenceSummary
+        <org.openthos.taskmanager.prevent.ui.ListPreferenceSummary
             android:defaultValue="-1"
             android:entries="@array/force_stop_entries"
             android:entryValues="@array/force_stop_values"
