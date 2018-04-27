@@ -278,7 +278,7 @@ public class PreventFragment extends BaseFragment
                     mNonNeedDormants.add(appInfo);
                     break;
                 case Constants.NOT_RUN:
-                    mBackgroundDatas.add(appInfo);
+//                    mBackgroundDatas.add(appInfo);
                     break;
             }
         }
