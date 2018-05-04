@@ -12,6 +12,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 
+import com.jaredrummler.android.processes.models.AndroidAppProcess;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -383,9 +385,17 @@ public final class SystemHook {
         for (File file : proc.listFiles()) {
             if (file.isDirectory() && TextUtils.isDigitsOnly(file.getName())) {
                 int pid = Integer.parseInt(file.getName());
-                int uid = HideApiUtils.getUidForPid(file.getName());
-                if (HideApiUtils.getParentPid(pid) == 1 && uid >= FIRST_APPLICATION_UID) {
-                    killIfNeed(uid, pid);
+                AndroidAppProcess process = null;
+                try {
+                    process = new AndroidAppProcess(pid);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (AndroidAppProcess.NotAndroidAppProcessException e) {
+                    e.printStackTrace();
+                }
+                //int uid = HideApiUtils.getUidForPid(file.getName());
+                if (HideApiUtils.getParentPid(pid) == 1 && process.uid >= FIRST_APPLICATION_UID) {
+                    killIfNeed(process.uid, pid);
                 }
             }
         }

@@ -11,6 +11,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 
+import com.jaredrummler.android.processes.models.AndroidAppProcess;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,11 +78,20 @@ abstract class ActivityReceiver extends BroadcastReceiver {
 
     private boolean checkPid(int pid, String packageName) {
         Integer uid = packageUids.get(packageName);
+        AndroidAppProcess process = null;
         if (uid == null) {
             return false;
         }
         try {
-            if (HideApiUtils.getUidForPid(packageName) != uid) {
+            process = new AndroidAppProcess(pid);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (AndroidAppProcess.NotAndroidAppProcessException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (process.uid != uid) {
+            //if (HideApiUtils.getUidForPid(packageName) != uid) {
                 return false;
             }
         } catch (Throwable t) { // NOSONAR
