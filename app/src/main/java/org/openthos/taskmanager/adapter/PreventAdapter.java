@@ -17,6 +17,7 @@ import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnListClickListener;
 import org.openthos.taskmanager.PreventActivity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,11 +30,11 @@ public class PreventAdapter extends BasicAdapter {
     private View.OnHoverListener mOnHoverListener;
     private final PackageManager mPm;
 
-    public PreventAdapter(Context context, List<AppInfo> datas) {
+    public PreventAdapter(Context context) {
         super(context);
-        mDatas = datas;
         mActivity = (PreventActivity) context;
         mPm = mActivity.getPackageManager();
+        mDatas = new ArrayList<>();
     }
 
     @Override
@@ -107,9 +108,11 @@ public class PreventAdapter extends BasicAdapter {
         mOnHoverListener = onHoverListener;
     }
 
-    @Override
-    public void refreshList() {
-
+    public void refreshList(List<AppInfo> appInfos) {
+        mDatas.clear();
+        if (appInfos != null) {
+            mDatas.addAll(appInfos);
+        }
         Collections.sort(mDatas, new Comparator<AppInfo>() {
             @Override
             public int compare(AppInfo o1, AppInfo o2) {

@@ -9,7 +9,4 @@ public abstract class BasicAdapter extends BaseAdapter {
     public BasicAdapter(Context context) {
         mContext = context;
     }
-
-    public abstract void refreshList();
-
 }

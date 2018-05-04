@@ -18,10 +18,12 @@ public class PreventLayoutAdapter extends BasicAdapter {
     private List<AppLayoutInfo> mDatas;
     private OnListClickListener mOnListClickListener;
     private View.OnHoverListener mOnHoverListener;
+    private boolean mIsRefresh;
 
     public PreventLayoutAdapter(Context context) {
         super(context);
         mDatas = new ArrayList<>();
+        mIsRefresh = true;
     }
 
     @Override
@@ -52,9 +54,9 @@ public class PreventLayoutAdapter extends BasicAdapter {
         }
         AppLayoutInfo appLayoutInfo = mDatas.get(position);
         holder.type.setText(appLayoutInfo.getType());
-        PreventAdapter adapter = new PreventAdapter(mContext, appLayoutInfo.getAppInfos());
+        PreventAdapter adapter = new PreventAdapter(mContext);
         holder.listView.setAdapter(adapter);
-        adapter.refreshList();
+        adapter.refreshList(appLayoutInfo.getAppInfos());
         adapter.setOnListClickListener(mOnListClickListener);
         adapter.setOnHoverListener(mOnHoverListener);
         return convertView;
@@ -68,18 +70,16 @@ public class PreventLayoutAdapter extends BasicAdapter {
         mOnHoverListener = onHoverListener;
     }
 
-
-    @Override
-    public void refreshList() {
-        notifyDataSetChanged();
-    }
-
     public void refreshList(List<AppLayoutInfo> datas) {
-        mDatas.clear();
-        if (datas != null) {
-            mDatas.addAll(datas);
+        if (mIsRefresh) {
+            mIsRefresh = false;
+            mDatas.clear();
+            if (datas != null) {
+                mDatas.addAll(datas);
+            }
+            notifyDataSetChanged();
+            mIsRefresh = true;
         }
-        notifyDataSetChanged();
     }
 
     private class ViewHolder {

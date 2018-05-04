@@ -51,7 +51,6 @@ public class MenuAdapter extends BasicAdapter {
         return convertView;
     }
 
-    @Override
     public void refreshList() {
         notifyDataSetChanged();
     }
