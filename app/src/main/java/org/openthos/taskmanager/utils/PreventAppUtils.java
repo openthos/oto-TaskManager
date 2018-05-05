@@ -28,8 +28,8 @@ public class PreventAppUtils {
      *
      * @param packageName
      */
-    public void saveAddedApp(String packageName, String appName) {
-        mPreferences.edit().putString(packageName, appName).commit();
+    public void saveAddedApp(String packageName, boolean isPrevent) {
+        mPreferences.edit().putBoolean(packageName, isPrevent).commit();
     }
 
     /**
@@ -37,8 +37,8 @@ public class PreventAppUtils {
      *
      * @return
      */
-    public Map<String, String> getAllAddedApp() {
-        return (Map<String, String>) mPreferences.getAll();
+    public Map<String, Boolean> getAllAddedApp() {
+        return (Map<String, Boolean>) mPreferences.getAll();
     }
 
     /**

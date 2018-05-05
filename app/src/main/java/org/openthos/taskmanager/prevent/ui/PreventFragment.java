@@ -1,4 +1,4 @@
-package org.openthos.taskmanager;
+package org.openthos.taskmanager.prevent.ui;
 
 import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
@@ -36,8 +36,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jaredrummler.android.processes.ProcessManager;
-import com.jaredrummler.android.processes.models.AndroidAppProcess;
+import com.wenming.library.processutil.ProcessManager;
+import com.wenming.library.processutil.models.AndroidAppProcess;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,6 +51,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.openthos.taskmanager.BaseFragment;
+import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.adapter.PreventAdapter;
 import org.openthos.taskmanager.adapter.PreventLayoutAdapter;
 import org.openthos.taskmanager.app.Constants;
@@ -60,6 +62,7 @@ import org.openthos.taskmanager.listener.OnCpuChangeListener;
 import org.openthos.taskmanager.listener.OnListClickListener;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
 import org.openthos.taskmanager.prevent.common.PackageUtils;
+import org.openthos.taskmanager.prevent.ui.PreventActivity;
 import org.openthos.taskmanager.prevent.ui.util.StatusUtils;
 import org.openthos.taskmanager.prevent.ui.util.UILog;
 import org.openthos.taskmanager.task.RetrieveInfoTask;

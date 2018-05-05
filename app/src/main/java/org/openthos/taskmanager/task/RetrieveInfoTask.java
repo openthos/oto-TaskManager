@@ -7,26 +7,25 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
+import org.openthos.taskmanager.MainActivity;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
-import org.openthos.taskmanager.PreventActivity;
 import org.openthos.taskmanager.prevent.ui.util.LabelLoader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
     private ProgressDialog dialog;
     private LabelLoader labelLoader;
-    private PreventActivity mActivity;
+    private MainActivity mActivity;
     private Set<String> mPackageNames;
     private OnTaskCallBack mCallBack;
 
     public RetrieveInfoTask(Context context, Set<String> packageNames, OnTaskCallBack callBack) {
-        mActivity = (PreventActivity) context;
+        mActivity = (MainActivity) context;
         mPackageNames = packageNames;
         mCallBack = callBack;
     }
@@ -45,7 +44,7 @@ public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
 
     @Override
     protected List<AppInfo> doInBackground(Void... params) {
-        Map<String, Set<Long>> running = mActivity.getRunningProcesses();
+//        Map<String, Set<Long>> running = mActivity.getRunningProcesses();
         List<AppInfo> applications = new ArrayList<>();
         int i = 1;
         AppInfo appInfo;
@@ -64,7 +63,7 @@ public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
             appInfo = new AppInfo();
             appInfo.setPackageName(packageName);
             appInfo.setAppName(label);
-            appInfo.setRunning(running.get(packageName));
+//            appInfo.setRunning(running.get(packageName));
             appInfo.setFlags(info.flags);
             try {
                 Drawable icon = mActivity.getPackageManager().getApplicationIcon(packageName);

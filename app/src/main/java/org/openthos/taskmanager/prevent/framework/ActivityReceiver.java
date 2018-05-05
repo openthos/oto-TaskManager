@@ -11,7 +11,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 
-import com.jaredrummler.android.processes.models.AndroidAppProcess;
+import com.wenming.library.processutil.models.AndroidAppProcess;
 
 import java.io.IOException;
 import java.util.HashMap;

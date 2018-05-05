@@ -10,7 +10,7 @@ import android.net.Uri;
 
 import java.util.Set;
 
-import org.openthos.taskmanager.PreventRunningHook;
+import org.openthos.taskmanager.prevent.PreventRunningHook;
 import org.openthos.taskmanager.BuildConfig;
 import org.openthos.taskmanager.prevent.framework.util.BroadcastFilterUtils;
 import org.openthos.taskmanager.prevent.framework.util.LogcatUtils;

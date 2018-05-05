@@ -12,7 +12,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 
-import com.jaredrummler.android.processes.models.AndroidAppProcess;
+import com.wenming.library.processutil.models.AndroidAppProcess;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

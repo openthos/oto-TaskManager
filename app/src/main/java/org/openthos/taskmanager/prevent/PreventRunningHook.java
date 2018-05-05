@@ -1,4 +1,4 @@
-package org.openthos.taskmanager;
+package org.openthos.taskmanager.prevent;
 
 import android.content.ComponentName;
 import android.content.Context;

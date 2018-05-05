@@ -35,17 +35,7 @@ public abstract class BaseFragment extends Fragment {
      * @param pkgName
      */
     public void forceStopAPK(String pkgName) {
-        Process sh = null;
-        DataOutputStream os = null;
-        try {
-            sh = Runtime.getRuntime().exec("su");
-            os = new DataOutputStream(sh.getOutputStream());
-            final String Command = "am force-stop " + pkgName + "\n";
-            os.writeBytes(Command);
-            os.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ((BaseActivity) getActivity()).forceStopAPK(pkgName);
     }
 
     public abstract int getLayoutId();

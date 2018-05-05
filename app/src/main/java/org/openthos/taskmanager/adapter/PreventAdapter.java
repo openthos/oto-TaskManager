@@ -15,7 +15,6 @@ import android.widget.TextView;
 import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnListClickListener;
-import org.openthos.taskmanager.PreventActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,15 +24,13 @@ import java.util.Set;
 
 public class PreventAdapter extends BasicAdapter {
     private List<AppInfo> mDatas;
-    private PreventActivity mActivity;
     private OnListClickListener mOnListClickListener;
     private View.OnHoverListener mOnHoverListener;
     private final PackageManager mPm;
 
     public PreventAdapter(Context context) {
         super(context);
-        mActivity = (PreventActivity) context;
-        mPm = mActivity.getPackageManager();
+        mPm = context.getPackageManager();
         mDatas = new ArrayList<>();
     }
 
@@ -75,11 +72,6 @@ public class PreventAdapter extends BasicAdapter {
                 ? R.mipmap.o_protect
                 : R.mipmap.add_black);
 
-        if (appInfo.isSystem()) {
-            convertView.setBackgroundColor(mActivity.getDangerousColor());
-        } else {
-            convertView.setBackgroundColor(mActivity.getTransparentColor());
-        }
         holder.canUninstall = ((appInfo.getFlags() & ApplicationInfo.FLAG_SYSTEM) == 0)
                 || ((appInfo.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         if (appInfo.getIcon() == null) {

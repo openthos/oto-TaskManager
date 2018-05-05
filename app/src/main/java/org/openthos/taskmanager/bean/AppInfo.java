@@ -91,9 +91,6 @@ public class AppInfo {
     }
 
     public String getCpuUsage() {
-        if (running == null) {
-            return "";
-        }
         return cpuUsage + "%";
     }
 

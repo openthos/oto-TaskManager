@@ -1,4 +1,4 @@
-package org.openthos.taskmanager;
+package org.openthos.taskmanager.prevent.ui;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.app.Constants;
 import org.openthos.taskmanager.prevent.common.PackageUtils;
 import org.openthos.taskmanager.prevent.common.PreventIntent;

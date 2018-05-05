@@ -8,7 +8,7 @@
         android:protectionLevel="signature"/>
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <!--<permission android:name="android.permission.ACCESS_SUPERUSER"/>-->
+    <!-- <permission android:name="android.permission.ACCESS_SUPERUSER"/> -->
     <uses-permission android:name="com.android.vending.BILLING"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="org.openthos.taskmanager.permission.MANAGER"/>
@@ -19,7 +19,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="xposedmodule"
             android:value="true"/>
@@ -31,10 +30,24 @@
             android:value="2.1+"/>
 
         <activity
-            android:name="org.openthos.taskmanager.PreventActivity"
+            android:name=".prevent.ui.PreventActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden">
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN"/>-->
+            <!--<action android:name="org.openthos.taskmanager.prevent.NOT_SUPPORTED"/>-->
+
+            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
+            <!--</intent-filter>-->
+        </activity>
+
+        <provider
+            android:name=".prevent.ui.PreventProvider"
+            android:authorities="org.openthos.taskmanager.prevent.provider"
+            android:permission="android.permission.SHUTDOWN"/>
+
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="org.openthos.taskmanager.prevent.NOT_SUPPORTED"/>
@@ -42,11 +55,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <provider
-            android:name="org.openthos.taskmanager.prevent.ui.PreventProvider"
-            android:authorities="org.openthos.taskmanager.prevent.provider"
-            android:permission="android.permission.SHUTDOWN"/>
     </application>
 
 </manifest>
