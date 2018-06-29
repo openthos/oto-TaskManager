@@ -27,7 +27,7 @@
             android:value="@string/xposed_summary"/>
         <meta-data
             android:name="xposedminversion"
-            android:value="2.1+"/>
+            android:value="@string/xposed_version"/>
 
         <activity
             android:name=".prevent.ui.PreventActivity"

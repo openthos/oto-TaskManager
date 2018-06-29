@@ -90,7 +90,7 @@ abstract class ActivityReceiver extends BroadcastReceiver {
             e.printStackTrace();
         }
         try {
-            if (process.uid != uid) {
+            if (process !=null && process.uid != uid) {
             //if (HideApiUtils.getUidForPid(packageName) != uid) {
                 return false;
             }
@@ -102,7 +102,10 @@ abstract class ActivityReceiver extends BroadcastReceiver {
             return true;
         }
         PreventLog.v("pid: " + pid + ", package: " + packageName + ", process: " + processName);
-        Set<String> abnormalPackages = abnormalProcesses.get(processName);
+        Set<String> abnormalPackages = null;
+        if (abnormalProcesses != null) {
+            abnormalPackages = abnormalProcesses.get(processName);
+        }
         return abnormalPackages != null && abnormalPackages.contains(packageName);
     }
 

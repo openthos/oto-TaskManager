@@ -37,6 +37,7 @@
     <string name="soak_version">这是测试版本，可能导致您的机器无法运行。如果不想参加测试，请恢复至正式版本。</string>
 
     <!-- xposed -->
+    <string name="xposed_version">2.1+</string>
     <string name="xposed_summary">阻止程序自动运行</string>
     <string name="xposed_disabled">请在“Xposed Installer”中启用“阻止运行”，或者先禁用再启用“阻止运行”。</string>
     <string name="install_internal">“阻止运行”应该安装在内部存储。</string>

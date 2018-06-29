@@ -37,6 +37,7 @@
     <string name="soak_version">This is not a release version, and may block your device. If you don\'t like to be participate, please uninstall and restore to release version.</string>
 
     <!-- xposed -->
+    <string name="xposed_version">2.1+</string>
     <string name="xposed_summary">Prevent applications from running.</string>
     <string name="xposed_disabled">Please enable \"Prevent Running\" in \"Xposed Installer\", or disable then enable \"Prevent Running\".</string>
     <string name="install_internal">Prevent Running should be installed in internal storage.</string>
