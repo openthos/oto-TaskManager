@@ -504,6 +504,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                     break;
                 case Intent.ACTION_PACKAGE_REMOVED:
                     mAllDatasMap.remove(packageName);
+                    PreventAppUtils.getInstance(MainActivity.this).removeAddApp(packageName);
                     break;
                 case Intent.ACTION_PACKAGE_REPLACED:
                     break;

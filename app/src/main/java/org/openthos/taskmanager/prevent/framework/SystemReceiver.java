@@ -239,7 +239,7 @@ public class SystemReceiver extends ActivityReceiver {
         if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
             handlePackageRestarted("PACKAGE_RESTARTED", packageName);
         } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-            onPackageAdded(intent);
+//            onPackageAdded(intent);
         } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
             onPackageRemoved(intent);
         }
