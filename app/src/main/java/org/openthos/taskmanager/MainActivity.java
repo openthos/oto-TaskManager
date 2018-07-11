@@ -221,6 +221,9 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
             if (appInfo != null) {
                 int[] mempid = new int[]{info.pid};
                 Debug.MemoryInfo[] memoryInfo = am.getProcessMemoryInfo(mempid);
+                if (memoryInfo == null) {
+                    return;
+                }
                 double memSize = memoryInfo[0].getTotalPss() / 1024;
                 appInfo.setMemoryUsage(memSize);
                 appInfo.setRunDescribe(getString(info.foreground

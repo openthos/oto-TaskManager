@@ -103,7 +103,7 @@ abstract class ActivityReceiver extends BroadcastReceiver {
         }
         PreventLog.v("pid: " + pid + ", package: " + packageName + ", process: " + processName);
         Set<String> abnormalPackages = null;
-        if (abnormalProcesses != null) {
+        if (abnormalProcesses != null && processName != null) {
             abnormalPackages = abnormalProcesses.get(processName);
         }
         return abnormalPackages != null && abnormalPackages.contains(packageName);
