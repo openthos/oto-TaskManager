@@ -99,7 +99,8 @@ public final class PreventListUtils {
     }
 
     public static boolean notify(Context context, String action, int resId) {
-        ComponentName component = new ComponentName(BuildConfig.APPLICATION_ID, "org.openthos.taskmanager.prevent.ui.PreventActivity");
+        ComponentName component = new ComponentName(BuildConfig.APPLICATION_ID,
+                "org.openthos.taskmanager.MainActivity");
         Intent open = new Intent(action);
         open.setComponent(component);
         open.addCategory(Intent.CATEGORY_LAUNCHER);
