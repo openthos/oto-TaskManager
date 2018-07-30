@@ -33,6 +33,8 @@
     <string name="refresh">刷新</string>
     <string name="stop_running_application">停止所有正在运行应用</string>
     <string name="add_non_dormant_list">加入无需休眠列表</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
 
     <string name="soak_version">这是测试版本，可能导致您的机器无法运行。如果不想参加测试，请恢复至正式版本。</string>
 

@@ -13,6 +13,7 @@ import org.openthos.taskmanager.view.CustomListView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PreventLayoutAdapter extends BasicAdapter {
     private List<AppLayoutInfo> mDatas;
@@ -75,7 +76,27 @@ public class PreventLayoutAdapter extends BasicAdapter {
             mIsRefresh = false;
             mDatas.clear();
             if (datas != null) {
-                mDatas.addAll(datas);
+                for (AppLayoutInfo info : datas) {
+                    if (info.getAppInfos().size() != 0) {
+                        mDatas.add(info);
+                    }
+                }
+            }
+            notifyDataSetChanged();
+            mIsRefresh = true;
+        }
+    }
+
+    public void refreshList(Map<String, AppLayoutInfo> infoMap) {
+        if (mIsRefresh) {
+            mIsRefresh = false;
+            mDatas.clear();
+            if (infoMap != null) {
+                for (AppLayoutInfo info : infoMap.values()) {
+                    if (info.getAppInfos().size() != 0) {
+                        mDatas.add(info);
+                    }
+                }
             }
             notifyDataSetChanged();
             mIsRefresh = true;

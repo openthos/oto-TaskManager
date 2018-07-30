@@ -1,6 +1,5 @@
 package org.openthos.taskmanager.task;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -8,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import org.openthos.taskmanager.MainActivity;
-import org.openthos.taskmanager.R;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
 import org.openthos.taskmanager.prevent.ui.util.LabelLoader;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 
 public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
-    private ProgressDialog dialog;
     private LabelLoader labelLoader;
     private MainActivity mActivity;
     private Set<String> mPackageNames;
@@ -32,13 +29,6 @@ public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
 
     @Override
     protected void onPreExecute() {
-        dialog = new ProgressDialog(mActivity);
-        dialog.setTitle(R.string.app_name);
-        dialog.setIcon(R.mipmap.icon);
-        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        dialog.setCancelable(false);
-        dialog.setMax(mPackageNames.size());
-        dialog.show();
         labelLoader = new LabelLoader(mActivity);
     }
 
@@ -80,21 +70,11 @@ public class RetrieveInfoTask extends AsyncTask<Void, Integer, List<AppInfo>> {
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
-        if (dialog != null) {
-            dialog.setProgress(progress[0]);
-        }
+
     }
 
     @Override
     protected void onPostExecute(List<AppInfo> appInfos) {
         mCallBack.callBack(appInfos);
-        if (dialog != null) {
-            dialog.dismiss();
-            dialog = null;
-        }
-    }
-
-    public ProgressDialog getDialog() {
-        return dialog;
     }
 }

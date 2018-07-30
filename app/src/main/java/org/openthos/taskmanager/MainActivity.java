@@ -1,6 +1,8 @@
 package org.openthos.taskmanager;
 
 import android.app.ActivityManager;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +17,6 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -28,6 +29,7 @@ import org.openthos.taskmanager.adapter.PreventLayoutAdapter;
 import org.openthos.taskmanager.app.Constants;
 import org.openthos.taskmanager.bean.AppInfo;
 import org.openthos.taskmanager.bean.AppLayoutInfo;
+import org.openthos.taskmanager.dialog.ConfirmDialog;
 import org.openthos.taskmanager.listener.OnCpuChangeListener;
 import org.openthos.taskmanager.listener.OnListClickListener;
 import org.openthos.taskmanager.listener.OnTaskCallBack;
@@ -42,25 +44,24 @@ import org.openthos.taskmanager.view.HoverTextView;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends BaseActivity implements OnListClickListener, View.OnClickListener, View.OnHoverListener {
-    private PreventLayoutAdapter mAdapter;
-    private Set<String> prevNames = null;
-    private int headerIconWidth;
-    private static final int HEADER_ICON_WIDTH = 48;
-    private static Map<String, Position> positions = new HashMap<String, Position>();
-    private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(3);
+public class MainActivity extends BaseActivity
+        implements OnListClickListener, View.OnClickListener, View.OnHoverListener {
+    private static final String FORWARD_APP = "0";
+    private static final String NON_DORMANT = "1";
+    private static final String BACKGROUND_APP = "2";
 
-    private boolean scrolling;
-    private static boolean appNotification;
+    private PreventLayoutAdapter mAdapter;
+    private ExecutorService mFixedThreadPool = Executors.newSingleThreadExecutor();
+
     private ImageView mRefresh;
     private ImageView mClean;
     private TextView mCpuFrequence;
@@ -73,20 +74,18 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
     private Handler mHandler;
     private Handler mCircleHandler;
+    private ProgressDialog mDialog;
     private BatteryChangeReceiver mBatteryChangeReceiver;
     private AppInstallReceiver mAppInstallReceiver;
     private double mCpuMaxFreqGHz;
     private RefreshRunnable mRefreshRunnable;
 
-    private List<AppLayoutInfo> mDatas;
-    private List<AppInfo> mForwardDatas;
-    private List<AppInfo> mNonNeedDormants;
-    private List<AppInfo> mBackgroundDatas;
+    private Map<String, AppLayoutInfo> mDatas;
+
     private Map<String, AppInfo> mAllDatasMap;
     private double mTotalCpuUsed;
     private Map<String, Double> mCpuMap;
-    private boolean mIsLoadFinished;
-
+    private boolean mIsLoading;
 
     @Override
     public int getLayoutId() {
@@ -108,14 +107,15 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
     @Override
     public void initData() {
-        mDatas = new ArrayList<>();
-        mForwardDatas = new ArrayList<>();
-        mBackgroundDatas = new ArrayList<>();
-        mNonNeedDormants = new ArrayList<>();
+        mDatas = new HashMap<>();
+        mDatas.put(FORWARD_APP, new AppLayoutInfo(getString(R.string.forward_app)));
+        mDatas.put(NON_DORMANT, new AppLayoutInfo(getString(R.string.non_dormant)));
+        mDatas.put(BACKGROUND_APP, new AppLayoutInfo(getString(R.string.background_app)));
+
         mAllDatasMap = new HashMap<>();
         mCpuMap = new HashMap<>();
 
-        mIsLoadFinished = true;
+        mIsLoading = false;
 
         mHoverText.setParentView(mMainLayout);
         mAdapter = new PreventLayoutAdapter(this);
@@ -143,19 +143,6 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         mRefresh.setOnHoverListener(this);
         mClean.setOnHoverListener(this);
         mAdapter.setOnHoverListener(this);
-
-        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                scrolling = scrollState != SCROLL_STATE_IDLE;
-            }
-
-            @Override
-            public void onScroll(AbsListView view,
-                                 int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-            }
-        });
     }
 
     public HoverTextView getHoverText() {
@@ -163,9 +150,14 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     }
 
     private void initAllDatas() {
+        mCircleHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
+        initProgressDialog();
+        mDialog.show();
         new RetrieveInfoTask(this, getPreventPkgNames(), new OnTaskCallBack() {
             @Override
             public void callBack(List<AppInfo> appInfos) {
+                mDialog.dismiss();
                 mAllDatasMap.clear();
                 for (AppInfo appInfo : appInfos) {
                     mAllDatasMap.put(appInfo.getPackageName(), appInfo);
@@ -173,7 +165,12 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
                 initAllDataState();
                 refreshAllDataState();
                 loadData();
-                mCircleHandler.removeCallbacksAndMessages(null);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRefresh.setClickable(true);
+                    }
+                }, 500);
                 mCircleHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -188,8 +185,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     private void initAllDataState() {
         Map<String, Boolean> preventPackages = getPreventPackages();
         Map<String, String> nonDormantMaps = NonDormantAppUtils.getInstance(this).getAllAddedApp();
-        for (String packageName : mAllDatasMap.keySet()) {
-            AppInfo appInfo = mAllDatasMap.get(packageName);
+        for (AppInfo appInfo : mAllDatasMap.values()) {
             if (nonDormantMaps != null && nonDormantMaps.containsKey(appInfo.getPackageName())) {
                 appInfo.setNonDormant(true);
             } else {
@@ -197,7 +193,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
             }
 
             if (preventPackages != null && preventPackages.containsKey(appInfo.getPackageName())) {
-                appInfo.setAutoPrevent(preventPackages.get(packageName));
+                appInfo.setAutoPrevent(preventPackages.get(appInfo.getPackageName()));
             } else {
                 appInfo.setAutoPrevent(false);
             }
@@ -233,50 +229,30 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     }
 
     public void loadData() {
-        if (!mIsLoadFinished) {
-            return;
+        if (mIsLoading) return;
+        mIsLoading = true;
+        for (AppLayoutInfo layoutInfo : mDatas.values()) {
+            layoutInfo.getAppInfos().clear();
         }
-        mIsLoadFinished = false;
-        mDatas.clear();
-        mForwardDatas.clear();
-        mNonNeedDormants.clear();
-        mBackgroundDatas.clear();
-        for (String packageName : mAllDatasMap.keySet()) {
-            AppInfo appInfo = mAllDatasMap.get(packageName);
+        for (AppInfo appInfo : mAllDatasMap.values()) {
             switch (appInfo.getRunState(this)) {
                 case Constants.FORWARD_APP:
-                    mForwardDatas.add(appInfo);
+                    mDatas.get(FORWARD_APP).getAppInfos().add(appInfo);
                     break;
                 case Constants.BACKGROUND_APP:
-                    mBackgroundDatas.add(appInfo);
+                    mDatas.get(BACKGROUND_APP).getAppInfos().add(appInfo);
                     break;
                 case Constants.NO_DORMANT_APP:
-                    mNonNeedDormants.add(appInfo);
+                    mDatas.get(NON_DORMANT).getAppInfos().add(appInfo);
                     break;
                 case Constants.NOT_RUN:
-//                    mBackgroundDatas.add(appInfo);
                     break;
             }
         }
-
-        if (mForwardDatas.size() != 0) {
-            mDatas.add(new AppLayoutInfo(getString(R.string.forward_app), mForwardDatas));
-        }
-        if (mNonNeedDormants.size() != 0) {
-            mDatas.add(new AppLayoutInfo(getString(R.string.non_dormant), mNonNeedDormants));
-        }
-        if (mBackgroundDatas.size() != 0) {
-            mDatas.add(new AppLayoutInfo(getString(R.string.background_app), mBackgroundDatas));
-        }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
-                mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
-                mAdapter.refreshList(mDatas);
-                mIsLoadFinished = true;
-            }
-        });
+        mCpuUse.setText(getString(R.string.cpu_use, mTotalCpuUsed));
+        mCpuFrequence.setText(getString(R.string.cpu_frequence, mCpuMaxFreqGHz));
+        mAdapter.refreshList(mDatas);
+        mIsLoading = false;
     }
 
     private void registBatteryReceiver() {
@@ -311,6 +287,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
             unregisterReceiver(mAppInstallReceiver);
             mAppInstallReceiver = null;
         }
+        mDialog = null;
         super.onDestroy();
     }
 
@@ -327,9 +304,7 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     }
 
     public void notifyDataSetChanged() {
-        if (mIsLoadFinished) {
-            mFixedThreadPool.execute(mRefreshRunnable);
-        }
+        mFixedThreadPool.execute(mRefreshRunnable);
     }
 
     @Override
@@ -386,18 +361,39 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.refresh:
+                mRefresh.setClickable(false);
                 initAllDatas();
                 break;
             case R.id.clean:
-                for (String packageName : mAllDatasMap.keySet()) {
-                    AppInfo appInfo = mAllDatasMap.get(packageName);
-                    if (appInfo.getRunState(this) == Constants.FORWARD_APP
-                            || appInfo.getRunState(this) == Constants.BACKGROUND_APP) {
-                        forceStopAPK(packageName);
-                    }
-                }
+                stopRunningApp();
                 break;
         }
+    }
+
+    private void stopRunningApp() {
+        ConfirmDialog.getInstance(this).showDialog(
+                getString(R.string.stop_running_application),
+                getString(R.string.no),
+                getString(R.string.yes),
+                new ConfirmDialog.OnConfirmListener() {
+                    @Override
+                    public void cancel(Dialog dialog) {
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public void confirm(Dialog dialog) {
+                        for (AppInfo appInfo : mAllDatasMap.values()) {
+                            int runState = appInfo.getRunState(MainActivity.this);
+                            if (runState == Constants.FORWARD_APP
+                                    || runState == Constants.BACKGROUND_APP) {
+                                forceStopAPK(appInfo.getPackageName());
+                            }
+                        }
+                        dialog.dismiss();
+                    }
+                }
+        );
     }
 
     @Override
@@ -450,14 +446,14 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
         return "";
     }
 
-    private static class Position {
-        int pos;
-        int top;
+    private void initProgressDialog() {
+        mDialog = new ProgressDialog(this, R.style.DialogStyle);
+        mDialog.setMessage(getString(R.string.loading));
+        mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+    }
 
-        public Position(int pos, int top) {
-            this.pos = pos;
-            this.top = top;
-        }
+    public ProgressDialog getProgressDialog() {
+        return mDialog;
     }
 
     private class BatteryChangeReceiver extends BroadcastReceiver {
@@ -527,17 +523,22 @@ public class MainActivity extends BaseActivity implements OnListClickListener, V
 
                 @Override
                 public void loadComplete() {
-                    for (String packageName : mAllDatasMap.keySet()) {
-                        AppInfo appInfo = mAllDatasMap.get(packageName);
-                        if (mCpuMap.containsKey(packageName)) {
-                            appInfo.setCpuUsage(mCpuMap.get(packageName));
+                    for (AppInfo appInfo : mAllDatasMap.values()) {
+                        if (mCpuMap.containsKey(appInfo.getPackageName())) {
+                            appInfo.setCpuUsage(mCpuMap.get(appInfo.getPackageName()));
                         } else {
                             appInfo.clearCpuUsage();
                         }
                     }
                     mCpuMaxFreqGHz = DeviceUtils.getCurCpuFreq();
                     refreshAllDataState();
-                    loadData();
+                    if (mIsLoading) return;
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadData();
+                        }
+                    });
                 }
             });
         }

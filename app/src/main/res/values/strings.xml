@@ -33,6 +33,8 @@
     <string name="refresh">refresh</string>
     <string name="stop_running_application">stop all running application</string>
     <string name="add_non_dormant_list">Add non dormant list</string>
+    <string name="no">no</string>
+    <string name="yes">yes</string>
 
     <string name="soak_version">This is not a release version, and may block your device. If you don\'t like to be participate, please uninstall and restore to release version.</string>
 
