@@ -1,0 +1,207 @@
+From 2c6c7f2553cbfb970b96243b2cc4ee116adb15e7 Mon Sep 17 00:00:00 2001
+From: CaoYongren <m18410261910@163.com>
+Date: Wed, 20 Jun 2018 06:56:55 +0000
+Subject: [PATCH] demo to aido to systemui
+
+---
+ core/java/android/app/StatusBarManager.java          | 11 +++++++++++
+ .../com/android/internal/statusbar/IStatusBar.aidl   |  1 +
+ .../internal/statusbar/IStatusBarService.aidl        |  1 +
+ .../com/android/systemui/statusbar/CommandQueue.java | 12 ++++++++++++
+ .../systemui/statusbar/phone/PhoneStatusBar.java     |  7 ++++++-
+ .../android/systemui/statusbar/tv/TvStatusBar.java   |  3 +++
+ .../internal/policy/impl/PhoneWindowManager.java     | 20 ++++++++++++++------
+ .../server/statusbar/StatusBarManagerService.java    | 10 ++++++++++
+ 8 files changed, 58 insertions(+), 7 deletions(-)
+
+diff --git a/core/java/android/app/StatusBarManager.java b/core/java/android/app/StatusBarManager.java
+index c74afa8..35afc78d5 100644
+--- a/core/java/android/app/StatusBarManager.java
++++ b/core/java/android/app/StatusBarManager.java
+@@ -115,6 +115,17 @@ public class StatusBarManager {
+             throw new RuntimeException(ex);
+         }
+     }
++
++    public void stopPass() {
++        try {
++            final IStatusBarService svc = getService();
++            if (svc != null) {
++                svc.stopPass();
++            }
++        } catch (RemoteException ex) {
++            throw new RuntimeException(ex);
++        }
++    }
+     
+     public void showStatusBarSuggest() {
+         try {
+diff --git a/core/java/com/android/internal/statusbar/IStatusBar.aidl b/core/java/com/android/internal/statusbar/IStatusBar.aidl
+index 33b7b20..dd430b7 100644
+--- a/core/java/com/android/internal/statusbar/IStatusBar.aidl
++++ b/core/java/com/android/internal/statusbar/IStatusBar.aidl
+@@ -30,6 +30,7 @@ oneway interface IStatusBar
+     void animateExpandSettingsPanel();
+     void animateCollapsePanels();
+     void showStatusBarView();
++    void stopPassFocus();
+     void showStatusBarViewSuggest();
+     void showStatusBarViewPowerSleep();
+     void hideStatusBarView();
+diff --git a/core/java/com/android/internal/statusbar/IStatusBarService.aidl b/core/java/com/android/internal/statusbar/IStatusBarService.aidl
+index cf085db..4eb3f38 100644
+--- a/core/java/com/android/internal/statusbar/IStatusBarService.aidl
++++ b/core/java/com/android/internal/statusbar/IStatusBarService.aidl
+@@ -26,6 +26,7 @@ interface IStatusBarService
+ {
+     void expandNotificationsPanel();
+     void showStatusBar();
++    void stopPass();
+     void showStatusBarSuggest();
+     void showStatusBarPowerSleep();
+     void hideStatusBar();
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java b/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
+index 94cad76..760787a 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/CommandQueue.java
+@@ -72,6 +72,7 @@ public class CommandQueue extends IStatusBar.Stub {
+     private static final int MSG_SHOW_HOME_PANEL                = 30 << MSG_SHIFT;
+     private static final int MSG_SHOW_STATUSBAR_VIEW_POWER_SLEEP= 31 << MSG_SHIFT;
+     private static final int MSG_SHOW_INPUT_METHOD_PANEL        = 32 << MSG_SHIFT;
++    private static final int MSG_STOP_STATUSBAR_VIEW        = 33 << MSG_SHIFT;
+ 
+     public static final int FLAG_EXCLUDE_NONE = 0;
+     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
+@@ -97,6 +98,7 @@ public class CommandQueue extends IStatusBar.Stub {
+         public void disable(int state, boolean animate);
+         public void animateExpandNotificationsPanel();
+         public void showStatusBarView();
++        public void stopPassFocus();
+         public void showStatusBarViewSuggest();
+         public void showStatusBarViewPowerSleep();
+         public void hideStatusBarView();
+@@ -172,6 +174,13 @@ public class CommandQueue extends IStatusBar.Stub {
+         }
+     }
+ 
++    public void stopPassFocus() {
++       synchronized (mList) {
++            mHandler.removeMessages(MSG_STOP_STATUSBAR_VIEW);
++            mHandler.sendEmptyMessage(MSG_STOP_STATUSBAR_VIEW);
++       }
++    }
++
+     public void showStatusBarViewSuggest() {
+         synchronized (mList) {
+             mHandler.removeMessages(MSG_SHOW_STATUSBAR_VIEW_SUGGEST);
+@@ -436,6 +445,9 @@ public class CommandQueue extends IStatusBar.Stub {
+                 case MSG_SHOW_STATUSBAR_VIEW:
+                     mCallbacks.showStatusBarView();
+                     break;
++                case MSG_STOP_STATUSBAR_VIEW:
++                    mCallbacks.stopPassFocus();
++                    break;
+                 case MSG_SHOW_STATUSBAR_VIEW_SUGGEST:
+                     mCallbacks.showStatusBarViewSuggest();
+                     break;
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+index 1564b90..9426cb9 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java
+@@ -15,7 +15,7 @@
+  */
+ 
+ package com.android.systemui.statusbar.phone;
+-
++import android.widget.Toast;
+ import android.app.ActivityManagerNative;
+ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+ import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+@@ -2986,6 +2986,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
+     }
+ 
+     @Override
++    public void stopPassFocus() {
++        Toast.makeText(mContext, "focuse", Toast.LENGTH_LONG).show();
++    }
++
++    @Override
+     public void showStatusBarViewSuggest() {
+         if (mForceStatusBarHide == false) {
+             showStatusBarViewMarkless();
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java b/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
+index a40f0cd..0c1fcf4 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/tv/TvStatusBar.java
+@@ -72,6 +72,9 @@ public class TvStatusBar extends BaseStatusBar {
+     }
+ 
+     @Override
++    public void stopPassFocus() {} 
++
++    @Override
+     public void showStatusBarViewSuggest() {
+     }
+ 
+diff --git a/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java b/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+index 5463f92..c36741a 100644
+--- a/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
++++ b/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+@@ -1576,12 +1576,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+         }
+         */
+ 
+-        final Intent intent = new Intent();
+-        intent.setComponent(new ComponentName("com.android.startupmenu",
+-                                              "com.android.startupmenu.StartupMenuActivity"));
+-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RUN_STARTUP_MENU
+-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+-        mContext.startActivity(intent);
++        //final Intent intent = new Intent();
++        //intent.setComponent(new ComponentName("com.android.startupmenu",
++        //                                      "com.android.startupmenu.StartupMenuActivity"));
++        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RUN_STARTUP_MENU
++        //                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
++        //mContext.startActivity(intent);
++        stopPass();
+     }
+ 
+     void showGlobalActionsInternal() {
+@@ -6966,6 +6967,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+         }
+     }
+ 
++    private void stopPass() {
++        Log.i("Smaster00>>", "stopPass");
++        try {
++            mStatusBarService.stopPass();
++        } catch(Exception e) {}
++    }
++
+     @Override
+     public void setSleepingFlag(boolean status) {
+         mSleeping = status;
+diff --git a/services/core/java/com/android/server/statusbar/StatusBarManagerService.java b/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
+index 564c41a..3544f05 100644
+--- a/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
++++ b/services/core/java/com/android/server/statusbar/StatusBarManagerService.java
+@@ -234,6 +234,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
+     }
+ 
+     @Override
++    public void stopPass() {
++        enforceExpandStatusBar();
++        if (mBar != null) {
++            try {
++               mBar.stopPassFocus();
++            } catch (RemoteException ex) {}
++        }
++    }
++
++    @Override
+     public void showStatusBarSuggest() {
+         enforceExpandStatusBar();
+ 
+-- 
+1.9.1
+

@@ -688,6 +688,7 @@ public class PreventFragment extends BaseFragment
             Bundle extras = intent.getExtras();
             int level = extras.getInt(BatteryManager.EXTRA_LEVEL, 0);
             int status = extras.getInt(BatteryManager.EXTRA_STATUS);
+            boolean isPlug = extras.getInt(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             mBatteryCharge.setVisibility(View.VISIBLE);
             switch (status) {
                 case BatteryManager.BATTERY_STATUS_CHARGING:
@@ -706,9 +707,14 @@ public class PreventFragment extends BaseFragment
                     mBatteryCharge.setText(getString(R.string.battery_charge, level));
                     break;
                 default:
-                    mBattertState.setText(
-                            getString(R.string.battery_state, getString(R.string.battery_none)));
-                    mBatteryCharge.setVisibility(View.GONE);
+                    if (!isPlug) {
+                        mBattertState.setText(
+                                getString(R.string.battery_state, getString(R.string.battery_none)));
+                        mBatteryCharge.setVisibility(View.GONE);
+                    } else {
+                        mBattertState.setText(getString(R.string.battery_state, getString(R.string.battery_full)));
+                        mBatteryCharge.setText(getString(R.string.battery_charge, level));
+                    }
                     break;
             }
         }
